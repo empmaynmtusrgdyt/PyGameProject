@@ -9,7 +9,7 @@ if __name__ == '__main__':
     pygame.init()
     size = width, height = 900, 600
     screen = pygame.display.set_mode(size)
-    pygame.display.set_caption('Jumper')
+    pygame.display.set_caption('Jumper Game')
     clock = pygame.time.Clock()
     menu_instance = menu.Menu(screen)
     running = True
