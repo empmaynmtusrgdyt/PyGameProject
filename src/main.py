@@ -1,5 +1,4 @@
 import pygame
-import os
 import menu
 
 LIGHT_BLUE = (66, 170, 255)
