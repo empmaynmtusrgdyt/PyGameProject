@@ -1,5 +1,6 @@
 import pygame
 import menu
+import pygame_widgets
 
 LIGHT_BLUE = (66, 170, 255)
 
@@ -21,6 +22,8 @@ if __name__ == '__main__':
 
         screen.fill(LIGHT_BLUE)
         menu_instance.draw()
+        pygame_widgets.update(event)  # Обновляем виджеты
+        pygame.display.update()
         pygame.display.flip()
         clock.tick(60)
     pygame.quit()

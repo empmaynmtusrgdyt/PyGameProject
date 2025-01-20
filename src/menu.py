@@ -4,7 +4,8 @@ import os
 
 
 class Button():
-    def __init__(self, screen, x, y, radius, color, text, font, icon_path, action, text_offset_y=40):
+    def __init__(self, screen, x, y, radius, color, pressed_color, hover_color, text, font, icon_path,
+                 action, text_offset_y=40):
         self.screen = screen
         self.x = x
         self.y = y
@@ -16,6 +17,8 @@ class Button():
         self.icon_path = icon_path
         self.action = action
         self.text_offset_y = text_offset_y
+        self.hover_color = hover_color
+        self.pressed_color = pressed_color
 
         self.button, self.button_text_surface, self.button_text_rect = self._create_button()
 
@@ -36,8 +39,8 @@ class Button():
             self.screen, self.x - self.radius, self.y - self.radius,
                          self.radius * 2, self.radius * 2,
             inactiveColour=self.color,
-            hoverColour=(100, 200, 100),
-            pressedColour=(0, 150, 0),
+            hoverColour=self.hover_color,
+            pressedColour=self.pressed_color,
             onClick=self.action,
             image=button_image,
             text=""
@@ -70,14 +73,14 @@ class Menu():
         button_spacing = 300
         self.font = self.load_font('cartton_font.ttf', 60)
         self.centre_button = Button(screen, screen_width // 2, screen_height // 2, button_radius,
-                                    (0, 255, 0),
+                                    (0, 255, 0), (80, 200, 120), (0, 165, 80),
                              "Начать игру",
                              self.font, "icon-play.png", self.start_game)
         self.right_button = Button(screen, screen_width // 2 + button_spacing, screen_height // 2, button_radius,
-                                   (0, 0, 255),
-                                   "Персонажи", self.font, "icon-smile.png", self.select_skin())
+                                   (0, 0, 255), (102, 0, 255), (0, 0, 139),
+                                   "Персонажи", self.font, "icon-smile.png", self.select_skin)
         self.left_button = Button(screen, screen_width // 2 - button_spacing, screen_height // 2, button_radius,
-                                  (255, 0, 0),
+                                  (255, 0, 0), (255, 73, 108), (171, 52, 58),
                                   "Настройки", self.font, "icon-settings.png", self.open_settings)
         self.screen = screen
         self.cloud_image, self.cloud_image_rect = self.load_image('cloud.png',
