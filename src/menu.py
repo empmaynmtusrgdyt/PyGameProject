@@ -48,7 +48,7 @@ class Button():
         button.mask = pygame.mask.from_surface(button_image)
 
         button_text_surface, button_text_rect = self._render_text(self.text, self.font, (0, 0, 0), pos=(
-        self.x, self.y + self.radius + self.text_offset_y))
+            self.x, self.y + self.radius + self.text_offset_y))
 
         return button, button_text_surface, button_text_rect
 
@@ -74,8 +74,8 @@ class Menu():
         self.font = self.load_font('cartton_font.ttf', 60)
         self.centre_button = Button(screen, screen_width // 2, screen_height // 2, button_radius,
                                     (0, 255, 0), (80, 200, 120), (0, 165, 80),
-                             "Начать игру",
-                             self.font, "icon-play.png", self.start_game)
+                                    "Начать игру",
+                                    self.font, "icon-play.png", self.start_game)
         self.right_button = Button(screen, screen_width // 2 + button_spacing, screen_height // 2, button_radius,
                                    (0, 0, 255), (102, 0, 255), (0, 0, 139),
                                    "Персонажи", self.font, "icon-smile.png", self.select_skin)
