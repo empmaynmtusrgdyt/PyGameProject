@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
         screen.fill(LIGHT_BLUE)
         menu_instance.draw()
-        pygame_widgets.update(event)  # Обновляем виджеты
+        pygame_widgets.update(event) # Обновляем виджеты
         pygame.display.update()
         pygame.display.flip()
         clock.tick(60)
