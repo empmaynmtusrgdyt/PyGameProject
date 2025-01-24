@@ -1,18 +1,18 @@
 import pygame
-from pygame_widgets.button import Button as PygameWidgetsButton
 import os
+from pygame_widgets.button import Button as PygameWidgetsButton
+import sqlite3
 
+pygame.init()
 
 class Button():
-    def __init__(self, screen, x, y, radius, color, pressed_color, hover_color, text, font, icon_path,
-                 action, text_offset_y=40):
+    def __init__(self, screen, x, y, radius, color, pressed_color, hover_color, text, font, icon_path, action, text_offset_y=40):
         self.screen = screen
         self.x = x
         self.y = y
         self.radius = radius
         self.color = color
         self.text = text
-        self.font = font
         self.font = font
         self.icon_path = icon_path
         self.action = action
@@ -37,7 +37,7 @@ class Button():
 
         button = PygameWidgetsButton(
             self.screen, self.x - self.radius, self.y - self.radius,
-                         self.radius * 2, self.radius * 2,
+            self.radius * 2, self.radius * 2,
             inactiveColour=self.color,
             hoverColour=self.hover_color,
             pressedColour=self.pressed_color,
@@ -64,22 +64,29 @@ class Button():
         self.screen.blit(self.button_text_surface, self.button_text_rect)
         self.button.draw()
 
-
 class Menu():
     def __init__(self, screen):
-        screen_width = screen.get_width()
-        screen_height = screen.get_height()
-        button_radius = 50
-        button_spacing = 300
+        try:
+            self.db_connection = sqlite3.connect('game_data.db')
+            self.db_cursor = self.db_connection.cursor()
+            self.create_table()
+        except sqlite3.Error as e:
+            print(f"Ошибка подключения к базе данных: {e}")
+            self.db_connection = None
+            self.db_cursor = None
+        self.screen_width = screen.get_width()
+        self.screen_height = screen.get_height()
+        self.button_radius = 50
+        self.button_spacing = 300
         self.font = self.load_font('cartton_font.ttf', 60)
-        self.centre_button = Button(screen, screen_width // 2, screen_height // 2, button_radius,
+        self.centre_button = Button(screen, self.screen_width // 2, self.screen_height // 2, self.button_radius,
                                     (0, 255, 0), (80, 200, 120), (0, 165, 80),
                                     "Начать игру",
                                     self.font, "icon-play.png", self.start_game)
-        self.right_button = Button(screen, screen_width // 2 + button_spacing, screen_height // 2, button_radius,
+        self.right_button = Button(screen, self.screen_width // 2 + self.button_spacing, self.screen_height // 2, self.button_radius,
                                    (0, 0, 255), (102, 0, 255), (0, 0, 139),
                                    "Персонажи", self.font, "icon-smile.png", self.select_skin)
-        self.left_button = Button(screen, screen_width // 2 - button_spacing, screen_height // 2, button_radius,
+        self.left_button = Button(screen, self.screen_width // 2 - self.button_spacing, self.screen_height // 2, self.button_radius,
                                   (255, 0, 0), (255, 73, 108), (171, 52, 58),
                                   "Настройки", self.font, "icon-settings.png", self.open_settings)
         self.screen = screen
@@ -87,9 +94,15 @@ class Menu():
                                                                   colorkey=-1, scale=(200, 150), pos=(30, 10))
         self.title_surface, self.title_rect = self.render_text("Jump: Приключение прыгуна", self.font,
                                                                (0, 0, 0))
+        self.showing_skin_selector = False
+        self.skin_selector_screen = None
+        self.skin_selector_buttons = None
+        self.character_names = ["character1.png", "character2.png"]
+        self.selected_character = self.load_selected_character()
 
     def load_image(self, name, colorkey=None, scale=None, pos=None):
         fullname = os.path.join('..', 'data', name)
+
         try:
             image = pygame.image.load(fullname).convert()
         except pygame.error as message:
@@ -126,6 +139,7 @@ class Menu():
         return text_surface, text_rect
 
     def draw(self):
+        self.screen.fill((66, 170, 255))  # Используем цвет LIGHT_BLUE
         self.screen.blit(self.cloud_image, self.cloud_image_rect)
         self.screen.blit(self.title_surface, self.title_rect)
         self.centre_button.draw()
@@ -136,7 +150,109 @@ class Menu():
         pass
 
     def select_skin(self):
-        pass
+        if not self.showing_skin_selector:  # Проверяем, отображается ли уже окно выбора скина
+            self.showing_skin_selector = True
+            self.skin_selector_screen = pygame.display.set_mode((1000, 600))
+            self.create_skin_selector_buttons()
+            self.right_button = None
+            self.centre_button = None
+            self.left_button = None
+
+    def create_skin_selector_buttons(self):
+        button_width = 150
+        button_height = 50
+        font = self.font if self.font else pygame.font.SysFont("Arial", 30) # если не удалось загрузить шрифт то будет использоваться Arial
+        self.current_character_index = self.character_names.index(self.selected_character) if self.selected_character in self.character_names else 0
+
+        self.skin_selector_buttons = [
+            PygameWidgetsButton(self.skin_selector_screen, 50, 100, button_width, button_height, text="Следующий", font=font, onClick=self.next_skin),
+            PygameWidgetsButton(self.skin_selector_screen, 50, 170, button_width, button_height, text="Сохранить", font=font, onClick=self.save_skin),
+            PygameWidgetsButton(self.skin_selector_screen, 50, 240, button_width, button_height, text="Меню", font=font, onClick=self.hide_skin_selector)
+        ]
+
+    def draw_skin_selector(self):
+        if self.skin_selector_buttons and self.showing_skin_selector:
+            self.skin_selector_screen.fill((66, 170, 255))  # LIGHT_BLUE
+            try:
+                character_image = pygame.transform.scale(
+                    pygame.image.load(os.path.join('..', 'data', self.character_names[self.current_character_index])).convert_alpha(),
+                    (400, 400))
+                self.skin_selector_screen.blit(character_image, (400, 40))
+            except pygame.error as e:
+                print(f"Ошибка загрузки картинки персонажа: {self.character_names[self.current_character_index]}. {e}")
+
+            for button in self.skin_selector_buttons:
+                button.draw()
+
+            pygame.display.update()
+
+    def hide_skin_selector(self):
+        self.showing_skin_selector = False
+        if self.skin_selector_screen:
+            self.skin_selector_screen.fill((66, 170, 255))  # LIGHT_BLUE
+            pygame.display.flip()
+            self.skin_selector_screen = None
+            self.skin_selector_buttons = None
+            self.screen = pygame.display.set_mode((1000, 600))
+
+            self.centre_button = Button(self.screen, self.screen_width // 2, self.screen_height // 2, self.button_radius,
+                                        (0, 255, 0), (80, 200, 120), (0, 165, 80),
+                                        "Начать игру",
+                                        self.font, "icon-play.png", self.start_game)
+            self.right_button = Button(self.screen, self.screen_width // 2 + self.button_spacing, self.screen_height // 2,
+                                       self.button_radius,
+                                       (0, 0, 255), (102, 0, 255), (0, 0, 139),
+                                       "Персонажи", self.font, "icon-smile.png", self.select_skin)
+            self.left_button = Button(self.screen, self.screen_width // 2 - self.button_spacing, self.screen_height // 2,
+                                      self.button_radius,
+                                      (255, 0, 0), (255, 73, 108), (171, 52, 58),
+                                      "Настройки", self.font, "icon-settings.png", self.open_settings)
+
+
+    def next_skin(self):
+        self.current_character_index = (self.current_character_index + 1) % len(self.character_names)
+        self.draw_skin_selector()
+
+    def save_skin(self):
+        self.selected_character = self.character_names[self.current_character_index]
+        self.save_selected_character(self.selected_character)
+
+        self.hide_skin_selector()
 
     def open_settings(self):
         pass
+
+    def create_table(self):
+        if self.db_cursor:
+            try:
+                self.db_cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS game_settings (
+                        setting_name TEXT PRIMARY KEY,
+                        setting_value TEXT
+                    )
+                ''')
+                self.db_connection.commit()
+            except sqlite3.Error as e:
+                print(f"Ошибка создания таблицы: {e}")
+
+    def load_selected_character(self):
+        if self.db_cursor:
+            try:
+                self.db_cursor.execute("SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'")
+                result = self.db_cursor.fetchone()
+                return result[0] if result else self.character_names[0]
+            except sqlite3.Error as e:
+                print(f"Ошибка при загрузке данных персонажа: {e}")
+                return self.character_names[0]
+        else:
+            return self.character_names[0]
+
+    def save_selected_character(self, character_name):
+         if self.db_cursor:
+            try:
+                self.db_cursor.execute("REPLACE INTO game_settings (setting_name, setting_value) VALUES (?, ?)",
+                                       ('selected_character', character_name))
+                self.db_connection.commit()
+            except sqlite3.Error as e:
+                print(f"Ошибка сохранения данных персонажа: {e}")
+
