@@ -329,7 +329,7 @@ class Menu():
             self.info_about_account.disable()
             self.info_about_account.font = self.font
             self.info_about_account.setText(self.text + ' ч.')
-            
+        self.click_sound.play()
     
     def leave_account_manage(self):
         self.quit_from_account_management.hide()
@@ -337,6 +337,7 @@ class Menu():
         self.settings_screen.fill((66, 170, 255))
         self.def_buttons()
         self.showing_account_management = False
+        self.click_sound.play()
         
     def leave_settings(self):
         self.showing_settings = False
