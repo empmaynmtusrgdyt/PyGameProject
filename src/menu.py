@@ -308,8 +308,8 @@ class Menu():
         self.quit.font = self.font
         self.quit.setText('МЕНЮ')
         self.quit.setOnClick(self.leave_settings)
-        self.account_button = Button(self.settings_screen, 700, 300, 100, self.quit.colour,
-                                     self.quit.pressedColour, self.quit.hoverColour, 'Аккаунт', self.font, 'account.png', self.account_manage)
+        self.account_button = Button(self.settings_screen, 700, 300, 100, (235, 128, 52),
+                                     (255, 155, 52), (125, 125, 52), 'Аккаунт', self.font, 'account.png', self.account_manage)
         self.account_button.draw()
 
     def account_manage(self):

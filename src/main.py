@@ -29,6 +29,7 @@ if __name__ == '__main__':
                 menu_instance.db_cursor.execute(
                     f'UPDATE game_settings SET time_played = {all_time + end_time}')
                 menu_instance.db_connection.commit()
+                menu_instance.db_connection.close()
 
         if menu_instance.showing_skin_selector:
             menu_instance.draw_skin_selector()
