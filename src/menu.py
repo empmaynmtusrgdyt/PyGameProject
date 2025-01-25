@@ -1,5 +1,6 @@
 import pygame
 import os
+import time
 from pygame_widgets.button import Button as PygameWidgetsButton
 import sqlite3
 import subprocess
@@ -148,6 +149,9 @@ class Menu():
         self.left_button.draw()
 
     def start_game(self):
+        subprocess.Popen(['python', 'first_level_intro.py'])
+        time.sleep(3)
+        subprocess.Popen(['python', 'first_level_intro.py']).kill()
         subprocess.Popen(['python', 'first_level.py'])
 
     def select_skin(self):
