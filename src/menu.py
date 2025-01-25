@@ -1,6 +1,7 @@
 import pygame
 import os
 from pygame_widgets.button import Button as PygameWidgetsButton
+from pygame_widgets.textbox import TextBox
 import sqlite3
 
 pygame.init()
@@ -103,15 +104,17 @@ class Menu():
         self.menu_music_is_playing = [item for item in self.db_cursor.execute(
             'SELECT music_is_playing FROM game_settings')][-1][-1]
         self.showing_settings = False
+        self.showing_account_management = False
         self.settings_screen = None
         self.showing_skin_selector = False
         self.skin_selector_screen = None
         self.skin_selector_buttons = None
         self.click_sound = pygame.mixer.Sound('data\click.mp3')
-        self.menu_music = pygame.mixer.Sound('data\menu.mp3')
+        self.click_sound.set_volume(35)
+        self.menu_music = pygame.mixer.Sound('data\menu.wav')
         self.character_names = ["character1.png", "character2.png"]
         self.selected_character = self.load_selected_character()
-        
+
         if self.menu_music_is_playing:
             self.menu_music.play()
         else:
@@ -295,25 +298,46 @@ class Menu():
 
     def def_buttons(self):
         if self.menu_music_is_playing:
-            self.music_button = Button(self.settings_screen, 300, 300, 100, 'GREEN', 'GREEN',
-                                   'GREEN', 'Музыка', self.font, 'music.png', self.play_music_menu)
+            self.music_button = Button(self.settings_screen, 300, 300, 100, 'GREEN', (0, 200, 0),
+                                       (0, 150, 0), 'Музыка', self.font, 'music.png', self.play_music_menu)
         else:
-            self.music_button = Button(self.settings_screen, 300, 300, 100, 'RED', 'RED',
-                                   'RED', 'Музыка', self.font, 'music.png', self.play_music_menu)
+            self.music_button = Button(self.settings_screen, 300, 300, 100, 'RED', (200, 0, 0),
+                                       (150, 0, 0), 'Музыка', self.font, 'music.png', self.play_music_menu)
         self.music_button.draw()
         self.quit = PygameWidgetsButton(self.settings_screen, 0, 0, 200, 50)
         self.quit.font = self.font
-        self.quit.setHoverColour('GRAY')
-        self.quit.setInactiveColour('GREEN')
         self.quit.setText('МЕНЮ')
         self.quit.setOnClick(self.leave_settings)
-        self.account_button = Button(self.settings_screen, 700, 300, 100, 'GREEN',
-                                     'WHITE', 'GREEN', 'Аккаунт', self.font, 'account.png', self.account_manage)
+        self.account_button = Button(self.settings_screen, 700, 300, 100, self.quit.colour,
+                                     self.quit.pressedColour, self.quit.hoverColour, 'Аккаунт', self.font, 'account.png', self.account_manage)
         self.account_button.draw()
 
     def account_manage(self):
-        self.click_sound.play()
-
+        if not self.showing_account_management:
+            self.showing_account_management = True
+            self.account_button.button.hide()
+            self.music_button.button.hide()
+            self.quit.hide()
+            self.account_screen = pygame.display.set_mode((1000, 600))
+            self.account_screen.fill((66, 170, 255))
+            self.quit_from_account_management = PygameWidgetsButton(self.account_screen, 350, 490, 300, 100)
+            self.quit_from_account_management.font = self.font
+            self.quit_from_account_management.setOnClick(self.leave_account_manage)
+            self.quit_from_account_management.setText('Назад')
+            self.text = f'За всё время Вы наиграли {round(float([item for item in self.db_cursor.execute('SELECT time_played FROM game_settings')][-1][-1]), 1)}'
+            self.info_about_account = TextBox(self.account_screen, 100, 100, 800, 100)
+            self.info_about_account.disable()
+            self.info_about_account.font = self.font
+            self.info_about_account.setText(self.text + ' ч.')
+            
+    
+    def leave_account_manage(self):
+        self.quit_from_account_management.hide()
+        self.info_about_account.hide()
+        self.settings_screen.fill((66, 170, 255))
+        self.def_buttons()
+        self.showing_account_management = False
+        
     def leave_settings(self):
         self.showing_settings = False
         self.centre_button.button.show()
@@ -328,12 +352,15 @@ class Menu():
         self.menu_music_is_playing = 1 if not self.menu_music_is_playing else 0
         if self.menu_music_is_playing:
             self.menu_music.play()
-            
-            self.music_button = Button(self.settings_screen, 300, 300, 100, 'GREEN', 'GREEN',
-                                   'GREEN', 'Музыка', self.font, 'music.png', self.play_music_menu)
+            self.music_button = Button(self.settings_screen, 300, 300, 100, 'GREEN', (0, 200, 0),
+                                       (0, 150, 0), 'Музыка', self.font, 'music.png', self.play_music_menu)
         elif not self.menu_music_is_playing:
-            self.music_button = Button(self.settings_screen, 300, 300, 100, 'RED', 'RED',
-                                    'RED', 'Музыка', self.font, 'music.png', self.play_music_menu)
+            self.music_button = Button(self.settings_screen, 300, 300, 100, 'RED', (200, 0, 0),
+                                       (150, 0, 0), 'Музыка', self.font, 'music.png', self.play_music_menu)
             self.menu_music.stop()
         self.music_button.draw()
         self.click_sound.play()
+
+        self.db_cursor.execute(f'UPDATE game_settings SET music_is_playing={
+                               self.menu_music_is_playing}')
+        self.db_connection.commit()
