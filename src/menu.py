@@ -2,6 +2,7 @@ import pygame
 import os
 from pygame_widgets.button import Button as PygameWidgetsButton
 import sqlite3
+import subprocess
 
 pygame.init()
 
@@ -147,7 +148,7 @@ class Menu():
         self.left_button.draw()
 
     def start_game(self):
-        pass
+        subprocess.Popen(['python', 'first_level.py'])
 
     def select_skin(self):
         if not self.showing_skin_selector:  # Проверяем, отображается ли уже окно выбора скина

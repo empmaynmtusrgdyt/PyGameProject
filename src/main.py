@@ -24,7 +24,7 @@ if __name__ == '__main__':
         else:
             menu_instance.draw()
 
-        pygame_widgets.update(events)  # Обновляем виджеты
+        pygame_widgets.update(events)
         pygame.display.flip()
         clock.tick(60)
 
