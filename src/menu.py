@@ -247,9 +247,6 @@ class Menu():
         self.hide_skin_selector()
         self.click_sound.play()
 
-    def open_settings(self):
-        pass
-
     def create_table(self):
         if self.db_cursor:
             try:
