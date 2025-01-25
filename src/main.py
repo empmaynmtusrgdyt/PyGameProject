@@ -18,9 +18,11 @@ if __name__ == '__main__':
         for event in events:
             if event.type == pygame.QUIT:
                 running = False
-
+                
         if menu_instance.showing_skin_selector:
             menu_instance.draw_skin_selector()
+        elif menu_instance.showing_settings:
+            menu_instance.open_settings()
         else:
             menu_instance.draw()
 
