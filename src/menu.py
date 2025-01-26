@@ -35,7 +35,7 @@ class Button():
         try:
             icon_image = pygame.transform.scale(
                 pygame.image.load(os.path.join(
-                    'data', self.icon_path)).convert_alpha(),
+                    '..', 'data', self.icon_path)).convert_alpha(),
                 (int(self.radius * 1.2), int(self.radius * 1.2)))
             icon_rect = icon_image.get_rect(center=(self.radius, self.radius))
             button_image.blit(icon_image, icon_rect)
@@ -111,9 +111,9 @@ class Menu():
         self.showing_skin_selector = False
         self.skin_selector_screen = None
         self.skin_selector_buttons = None
-        self.click_sound = pygame.mixer.Sound('data\click.mp3')
+        self.click_sound = pygame.mixer.Sound('../data/click.mp3')
         self.click_sound.set_volume(35)
-        self.menu_music = pygame.mixer.Sound('data\menu.wav')
+        self.menu_music = pygame.mixer.Sound('../data/menu.wav')
         self.character_names = ["character1.png", "character2.png"]
         self.selected_character = self.load_selected_character()
 
@@ -123,7 +123,7 @@ class Menu():
             self.menu_music.stop()
 
     def load_image(self, name, colorkey=None, scale=None, pos=None):
-        fullname = os.path.join('data', name)
+        fullname = os.path.join('..', 'data', name)
 
         try:
             image = pygame.image.load(fullname).convert()
@@ -147,7 +147,7 @@ class Menu():
         return scaled_image, image_rect
 
     def load_font(self, name, size):
-        fullname = os.path.join('data', name)
+        fullname = os.path.join('..', 'data', name)
         try:
             font = pygame.font.Font(fullname, size)
         except pygame.error as message:
@@ -208,7 +208,7 @@ class Menu():
             try:
                 character_image = pygame.transform.scale(
                     pygame.image.load(os.path.join(
-                        'data', self.character_names[self.current_character_index])).convert_alpha(),
+                        '..', 'data', self.character_names[self.current_character_index])).convert_alpha(),
                     (400, 400))
                 self.skin_selector_screen.blit(character_image, (400, 40))
             except pygame.error as e:
@@ -284,8 +284,11 @@ class Menu():
     def save_selected_character(self, character_name):
         if self.db_cursor:
             try:
-                self.db_cursor.execute("REPLACE INTO game_settings (setting_name, setting_value) VALUES (?, ?)",
-                                       ('selected_character', character_name))
+                self.db_cursor.execute("UPDATE game_settings SET setting_value = ? WHERE setting_name = ?",
+                                       (character_name, 'selected_character'))
+                if self.db_cursor.rowcount == 0:
+                    self.db_cursor.execute("INSERT INTO game_settings (setting_name, setting_value) VALUES (?, ?)",
+                                           ('selected_character', character_name))
                 self.db_connection.commit()
             except sqlite3.Error as e:
                 print(f"Ошибка сохранения данных персонажа: {e}")
