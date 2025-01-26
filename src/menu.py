@@ -2,10 +2,12 @@ import pygame
 import os
 import time
 from pygame_widgets.button import Button as PygameWidgetsButton
+from pygame_widgets.textbox import TextBox
 import sqlite3
 import subprocess
 
 pygame.init()
+
 
 class Button():
     def __init__(self, screen, x, y, radius, color, pressed_color, hover_color, text, font, icon_path, action, text_offset_y=40):
@@ -25,12 +27,15 @@ class Button():
         self.button, self.button_text_surface, self.button_text_rect = self._create_button()
 
     def _create_button(self):
-        button_image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(button_image, self.color, (self.radius, self.radius), self.radius)
+        button_image = pygame.Surface(
+            (self.radius * 2, self.radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(button_image, self.color,
+                           (self.radius, self.radius), self.radius)
 
         try:
             icon_image = pygame.transform.scale(
-                pygame.image.load(os.path.join('..', 'data', self.icon_path)).convert_alpha(),
+                pygame.image.load(os.path.join(
+                    'data', self.icon_path)).convert_alpha(),
                 (int(self.radius * 1.2), int(self.radius * 1.2)))
             icon_rect = icon_image.get_rect(center=(self.radius, self.radius))
             button_image.blit(icon_image, icon_rect)
@@ -59,12 +64,14 @@ class Button():
         if pos:
             text_rect = text_surface.get_rect(center=(pos[0], pos[1]))
         else:
-            text_rect = text_surface.get_rect(center=(self.screen.get_width() / 2, 50))
+            text_rect = text_surface.get_rect(
+                center=(self.screen.get_width() / 2, 50))
         return text_surface, text_rect
 
     def draw(self):
         self.screen.blit(self.button_text_surface, self.button_text_rect)
         self.button.draw()
+
 
 class Menu():
     def __init__(self, screen):
@@ -96,14 +103,27 @@ class Menu():
                                                                   colorkey=-1, scale=(200, 150), pos=(30, 10))
         self.title_surface, self.title_rect = self.render_text("Jump: Приключение прыгуна", self.font,
                                                                (0, 0, 0))
+        self.menu_music_is_playing = [item for item in self.db_cursor.execute(
+            'SELECT music_is_playing FROM game_settings')][-1][-1]
+        self.showing_settings = False
+        self.showing_account_management = False
+        self.settings_screen = None
         self.showing_skin_selector = False
         self.skin_selector_screen = None
         self.skin_selector_buttons = None
+        self.click_sound = pygame.mixer.Sound('data\click.mp3')
+        self.click_sound.set_volume(35)
+        self.menu_music = pygame.mixer.Sound('data\menu.wav')
         self.character_names = ["character1.png", "character2.png"]
         self.selected_character = self.load_selected_character()
 
+        if self.menu_music_is_playing:
+            self.menu_music.play()
+        else:
+            self.menu_music.stop()
+
     def load_image(self, name, colorkey=None, scale=None, pos=None):
-        fullname = os.path.join('..', 'data', name)
+        fullname = os.path.join('data', name)
 
         try:
             image = pygame.image.load(fullname).convert()
@@ -127,7 +147,7 @@ class Menu():
         return scaled_image, image_rect
 
     def load_font(self, name, size):
-        fullname = os.path.join('..', 'data', name)
+        fullname = os.path.join('data', name)
         try:
             font = pygame.font.Font(fullname, size)
         except pygame.error as message:
@@ -137,7 +157,8 @@ class Menu():
 
     def render_text(self, text, font, color):
         text_surface = font.render(text, True, color)
-        text_rect = text_surface.get_rect(center=(self.screen.get_width() / 2, 50))
+        text_rect = text_surface.get_rect(
+            center=(self.screen.get_width() / 2, 50))
         return text_surface, text_rect
 
     def draw(self):
@@ -162,17 +183,23 @@ class Menu():
             self.right_button = None
             self.centre_button = None
             self.left_button = None
+            self.click_sound.play()
 
     def create_skin_selector_buttons(self):
         button_width = 150
         button_height = 50
-        font = self.font if self.font else pygame.font.SysFont("Arial", 30) # если не удалось загрузить шрифт то будет использоваться Arial
-        self.current_character_index = self.character_names.index(self.selected_character) if self.selected_character in self.character_names else 0
+        # если не удалось загрузить шрифт то будет использоваться Arial
+        font = self.font if self.font else pygame.font.SysFont("Arial", 30)
+        self.current_character_index = self.character_names.index(
+            self.selected_character) if self.selected_character in self.character_names else 0
 
         self.skin_selector_buttons = [
-            PygameWidgetsButton(self.skin_selector_screen, 50, 100, button_width, button_height, text="Следующий", font=font, onClick=self.next_skin),
-            PygameWidgetsButton(self.skin_selector_screen, 50, 170, button_width, button_height, text="Сохранить", font=font, onClick=self.save_skin),
-            PygameWidgetsButton(self.skin_selector_screen, 50, 240, button_width, button_height, text="Меню", font=font, onClick=self.hide_skin_selector)
+            PygameWidgetsButton(self.skin_selector_screen, 50, 100, button_width,
+                                button_height, text="Следующий", font=font, onClick=self.next_skin),
+            PygameWidgetsButton(self.skin_selector_screen, 50, 170, button_width,
+                                button_height, text="Сохранить", font=font, onClick=self.save_skin),
+            PygameWidgetsButton(self.skin_selector_screen, 50, 240, button_width,
+                                button_height, text="Меню", font=font, onClick=self.hide_skin_selector)
         ]
 
     def draw_skin_selector(self):
@@ -180,11 +207,13 @@ class Menu():
             self.skin_selector_screen.fill((66, 170, 255))  # LIGHT_BLUE
             try:
                 character_image = pygame.transform.scale(
-                    pygame.image.load(os.path.join('..', 'data', self.character_names[self.current_character_index])).convert_alpha(),
+                    pygame.image.load(os.path.join(
+                        'data', self.character_names[self.current_character_index])).convert_alpha(),
                     (400, 400))
                 self.skin_selector_screen.blit(character_image, (400, 40))
             except pygame.error as e:
-                print(f"Ошибка загрузки картинки персонажа: {self.character_names[self.current_character_index]}. {e}")
+                print(f"Ошибка загрузки картинки персонажа: {
+                      self.character_names[self.current_character_index]}. {e}")
 
             for button in self.skin_selector_buttons:
                 button.draw()
@@ -212,20 +241,19 @@ class Menu():
                                       self.button_radius,
                                       (255, 0, 0), (255, 73, 108), (171, 52, 58),
                                       "Настройки", self.font, "icon-settings.png", self.open_settings)
-
+        self.click_sound.play()
 
     def next_skin(self):
-        self.current_character_index = (self.current_character_index + 1) % len(self.character_names)
+        self.current_character_index = (
+            self.current_character_index + 1) % len(self.character_names)
         self.draw_skin_selector()
+        self.click_sound.play()
 
     def save_skin(self):
         self.selected_character = self.character_names[self.current_character_index]
         self.save_selected_character(self.selected_character)
-
         self.hide_skin_selector()
-
-    def open_settings(self):
-        pass
+        self.click_sound.play()
 
     def create_table(self):
         if self.db_cursor:
@@ -243,7 +271,8 @@ class Menu():
     def load_selected_character(self):
         if self.db_cursor:
             try:
-                self.db_cursor.execute("SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'")
+                self.db_cursor.execute(
+                    "SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'")
                 result = self.db_cursor.fetchone()
                 return result[0] if result else self.character_names[0]
             except sqlite3.Error as e:
@@ -253,7 +282,7 @@ class Menu():
             return self.character_names[0]
 
     def save_selected_character(self, character_name):
-         if self.db_cursor:
+        if self.db_cursor:
             try:
                 self.db_cursor.execute("REPLACE INTO game_settings (setting_name, setting_value) VALUES (?, ?)",
                                        ('selected_character', character_name))
@@ -261,3 +290,83 @@ class Menu():
             except sqlite3.Error as e:
                 print(f"Ошибка сохранения данных персонажа: {e}")
 
+    def open_settings(self):
+        if not self.showing_settings:
+            self.showing_settings = True
+            self.settings_screen = pygame.display.set_mode((1000, 600))
+            self.settings_screen.fill((66, 170, 255))
+            self.def_buttons()
+            self.right_button.button.hide()
+            self.left_button.button.hide()
+            self.centre_button.button.hide()
+            self.click_sound.play()
+
+    def def_buttons(self):
+        if self.menu_music_is_playing:
+            self.music_button = Button(self.settings_screen, 300, 300, 100, 'GREEN', (0, 200, 0),
+                                       (0, 150, 0), 'Музыка', self.font, 'music.png', self.play_music_menu)
+        else:
+            self.music_button = Button(self.settings_screen, 300, 300, 100, 'RED', (200, 0, 0),
+                                       (150, 0, 0), 'Музыка', self.font, 'music.png', self.play_music_menu)
+        self.music_button.draw()
+        self.quit = PygameWidgetsButton(self.settings_screen, 0, 0, 200, 50)
+        self.quit.font = self.font
+        self.quit.setText('МЕНЮ')
+        self.quit.setOnClick(self.leave_settings)
+        self.account_button = Button(self.settings_screen, 700, 300, 100, (235, 128, 52),
+                                     (255, 155, 52), (125, 125, 52), 'Аккаунт', self.font, 'account.png', self.account_manage)
+        self.account_button.draw()
+
+    def account_manage(self):
+        if not self.showing_account_management:
+            self.showing_account_management = True
+            self.account_button.button.hide()
+            self.music_button.button.hide()
+            self.quit.hide()
+            self.account_screen = pygame.display.set_mode((1000, 600))
+            self.account_screen.fill((66, 170, 255))
+            self.quit_from_account_management = PygameWidgetsButton(self.account_screen, 350, 490, 300, 100)
+            self.quit_from_account_management.font = self.font
+            self.quit_from_account_management.setOnClick(self.leave_account_manage)
+            self.quit_from_account_management.setText('Назад')
+            self.text = f'За всё время Вы наиграли {round(float([item for item in self.db_cursor.execute('SELECT time_played FROM game_settings')][-1][-1]), 1)}'
+            self.info_about_account = TextBox(self.account_screen, 100, 100, 800, 100)
+            self.info_about_account.disable()
+            self.info_about_account.font = self.font
+            self.info_about_account.setText(self.text + ' ч.')
+        self.click_sound.play()
+    
+    def leave_account_manage(self):
+        self.quit_from_account_management.hide()
+        self.info_about_account.hide()
+        self.settings_screen.fill((66, 170, 255))
+        self.def_buttons()
+        self.showing_account_management = False
+        self.click_sound.play()
+        
+    def leave_settings(self):
+        self.showing_settings = False
+        self.centre_button.button.show()
+        self.right_button.button.show()
+        self.left_button.button.show()
+        self.account_button.button.hide()
+        self.music_button.button.hide()
+        self.quit.hide()
+        self.click_sound.play()
+
+    def play_music_menu(self):
+        self.menu_music_is_playing = 1 if not self.menu_music_is_playing else 0
+        if self.menu_music_is_playing:
+            self.menu_music.play()
+            self.music_button = Button(self.settings_screen, 300, 300, 100, 'GREEN', (0, 200, 0),
+                                       (0, 150, 0), 'Музыка', self.font, 'music.png', self.play_music_menu)
+        elif not self.menu_music_is_playing:
+            self.music_button = Button(self.settings_screen, 300, 300, 100, 'RED', (200, 0, 0),
+                                       (150, 0, 0), 'Музыка', self.font, 'music.png', self.play_music_menu)
+            self.menu_music.stop()
+        self.music_button.draw()
+        self.click_sound.play()
+
+        self.db_cursor.execute(f'UPDATE game_settings SET music_is_playing={
+                               self.menu_music_is_playing}')
+        self.db_connection.commit()
