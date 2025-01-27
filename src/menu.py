@@ -10,7 +10,8 @@ pygame.init()
 
 
 class Button():
-    def __init__(self, screen, x, y, radius, color, pressed_color, hover_color, text, font, icon_path, action, text_offset_y=40):
+    def __init__(self, screen, x, y, radius, color, pressed_color, hover_color, text, font, icon_path, action,
+                 text_offset_y=40):
         self.screen = screen
         self.x = x
         self.y = y
@@ -44,7 +45,7 @@ class Button():
 
         button = PygameWidgetsButton(
             self.screen, self.x - self.radius, self.y - self.radius,
-            self.radius * 2, self.radius * 2,
+                         self.radius * 2, self.radius * 2,
             inactiveColour=self.color,
             hoverColour=self.hover_color,
             pressedColour=self.pressed_color,
@@ -88,14 +89,17 @@ class Menu():
         self.button_radius = 50
         self.button_spacing = 300
         self.font = self.load_font('cartton_font.ttf', 60)
+        self.small_font = self.load_font('cartton_font.ttf', 30)
         self.centre_button = Button(screen, self.screen_width // 2, self.screen_height // 2, self.button_radius,
                                     (0, 255, 0), (80, 200, 120), (0, 165, 80),
                                     "Начать игру",
                                     self.font, "icon-play.png", self.start_game)
-        self.right_button = Button(screen, self.screen_width // 2 + self.button_spacing, self.screen_height // 2, self.button_radius,
+        self.right_button = Button(screen, self.screen_width // 2 + self.button_spacing, self.screen_height // 2,
+                                   self.button_radius,
                                    (0, 0, 255), (102, 0, 255), (0, 0, 139),
                                    "Персонажи", self.font, "icon-smile.png", self.select_skin)
-        self.left_button = Button(screen, self.screen_width // 2 - self.button_spacing, self.screen_height // 2, self.button_radius,
+        self.left_button = Button(screen, self.screen_width // 2 - self.button_spacing, self.screen_height // 2,
+                                  self.button_radius,
                                   (255, 0, 0), (255, 73, 108), (171, 52, 58),
                                   "Настройки", self.font, "icon-settings.png", self.open_settings)
         self.screen = screen
@@ -115,6 +119,14 @@ class Menu():
         self.click_sound.set_volume(35)
         self.menu_music = pygame.mixer.Sound('../data/menu.wav')
         self.character_names = ["character1.png", "character2.png"]
+        self.showing_skin_selector = False
+        self.skin_selector_screen = None
+        self.skin_selector_buttons = None
+        self.character_names = ["character1.png", "character2.png"]
+        self.character_stats = {
+            "character1.png": {"health": 150, "speed": 100, "name": "Персонаж 1"},
+            "character2.png": {"health": 100, "speed": 150, "name": "Персонаж 2"}
+        }
         self.selected_character = self.load_selected_character()
 
         if self.menu_music_is_playing:
@@ -210,10 +222,18 @@ class Menu():
                     pygame.image.load(os.path.join(
                         '..', 'data', self.character_names[self.current_character_index])).convert_alpha(),
                     (400, 400))
-                self.skin_selector_screen.blit(character_image, (400, 40))
+                self.skin_selector_screen.blit(character_image, (400, 30))
             except pygame.error as e:
                 print(f"Ошибка загрузки картинки персонажа: {
-                      self.character_names[self.current_character_index]}. {e}")
+                self.character_names[self.current_character_index]}. {e}")
+
+            stats = self.character_stats[self.character_names[self.current_character_index]]
+            name_text = self.render_text(stats['name'], self.small_font, (0, 0, 0))
+            health_text = self.render_text(f"Здоровье: {stats['health']}", self.font, (0, 0, 0))
+            speed_text = self.render_text(f"Скорость: {stats['speed']}", self.font, (0, 0, 0))
+            self.skin_selector_screen.blit(name_text[0], (515, 0))
+            self.skin_selector_screen.blit(health_text[0], (425, 420))
+            self.skin_selector_screen.blit(speed_text[0], (425, 470))
 
             for button in self.skin_selector_buttons:
                 button.draw()
@@ -229,15 +249,18 @@ class Menu():
             self.skin_selector_buttons = None
             self.screen = pygame.display.set_mode((1000, 600))
 
-            self.centre_button = Button(self.screen, self.screen_width // 2, self.screen_height // 2, self.button_radius,
+            self.centre_button = Button(self.screen, self.screen_width // 2, self.screen_height // 2,
+                                        self.button_radius,
                                         (0, 255, 0), (80, 200, 120), (0, 165, 80),
                                         "Начать игру",
                                         self.font, "icon-play.png", self.start_game)
-            self.right_button = Button(self.screen, self.screen_width // 2 + self.button_spacing, self.screen_height // 2,
+            self.right_button = Button(self.screen, self.screen_width // 2 + self.button_spacing,
+                                       self.screen_height // 2,
                                        self.button_radius,
                                        (0, 0, 255), (102, 0, 255), (0, 0, 139),
                                        "Персонажи", self.font, "icon-smile.png", self.select_skin)
-            self.left_button = Button(self.screen, self.screen_width // 2 - self.button_spacing, self.screen_height // 2,
+            self.left_button = Button(self.screen, self.screen_width // 2 - self.button_spacing,
+                                      self.screen_height // 2,
                                       self.button_radius,
                                       (255, 0, 0), (255, 73, 108), (171, 52, 58),
                                       "Настройки", self.font, "icon-settings.png", self.open_settings)
@@ -245,7 +268,7 @@ class Menu():
 
     def next_skin(self):
         self.current_character_index = (
-            self.current_character_index + 1) % len(self.character_names)
+                                               self.current_character_index + 1) % len(self.character_names)
         self.draw_skin_selector()
         self.click_sound.play()
 
@@ -317,7 +340,8 @@ class Menu():
         self.quit.setText('МЕНЮ')
         self.quit.setOnClick(self.leave_settings)
         self.account_button = Button(self.settings_screen, 700, 300, 100, (235, 128, 52),
-                                     (255, 155, 52), (125, 125, 52), 'Аккаунт', self.font, 'account.png', self.account_manage)
+                                     (255, 155, 52), (125, 125, 52), 'Аккаунт', self.font, 'account.png',
+                                     self.account_manage)
         self.account_button.draw()
 
     def account_manage(self):
@@ -338,7 +362,7 @@ class Menu():
             self.info_about_account.font = self.font
             self.info_about_account.setText(self.text + ' ч.')
         self.click_sound.play()
-    
+
     def leave_account_manage(self):
         self.quit_from_account_management.hide()
         self.info_about_account.hide()
@@ -346,7 +370,7 @@ class Menu():
         self.def_buttons()
         self.showing_account_management = False
         self.click_sound.play()
-        
+
     def leave_settings(self):
         self.showing_settings = False
         self.centre_button.button.show()
@@ -371,5 +395,5 @@ class Menu():
         self.click_sound.play()
 
         self.db_cursor.execute(f'UPDATE game_settings SET music_is_playing={
-                               self.menu_music_is_playing}')
+        self.menu_music_is_playing}')
         self.db_connection.commit()
