@@ -41,5 +41,4 @@ if __name__ == '__main__':
         pygame_widgets.update(events)
         pygame.display.flip()
         clock.tick(60)
-
     pygame.quit()
