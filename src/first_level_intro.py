@@ -22,6 +22,9 @@ except pygame.error as e:
 
 text = font.render("Первый уровень: Подземелье", True, WHITE)
 text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 3))
+
+text_2 = font.render("Цель - собрать 10 монет", True, WHITE)
+text_2_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
 running = True
 clock = pygame.time.Clock()
 start_time = time.time()
@@ -44,6 +47,7 @@ while running:
             running = False
     screen.fill(BLACK)
     screen.blit(text, text_rect)
+    screen.blit(text_2, text_2_rect)
     pygame.display.flip()
     clock.tick(60)
     if time.time() - start_time >= 3 or shutdown:

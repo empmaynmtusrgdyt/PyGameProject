@@ -124,8 +124,8 @@ class Menu():
         self.skin_selector_buttons = None
         self.character_names = ["character1.png", "character2.png"]
         self.character_stats = {
-            "character1.png": {"health": 150, "speed": 100, "name": "Персонаж 1"},
-            "character2.png": {"health": 100, "speed": 150, "name": "Персонаж 2"}
+            "character1.png": {"health": 150, "speed": 100, "name": "Red-BSD"},
+            "character2.png": {"health": 100, "speed": 150, "name": "Blue-BSD"}
         }
         self.selected_character = self.load_selected_character()
 
