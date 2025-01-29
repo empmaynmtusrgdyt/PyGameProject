@@ -20,10 +20,10 @@ except pygame.error as e:
     pygame.quit()
     exit()
 
-text = font.render("Первый уровень: Таинственное подземелье", True, WHITE)
+text = font.render("Второй уровень: Проклятый лес", True, WHITE)
 text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 3))
 
-text_2 = font.render("Цель - собрать 10 монет", True, WHITE)
+text_2 = font.render("Цель - собрать 25 монет", True, WHITE)
 text_2_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
 running = True
 clock = pygame.time.Clock()

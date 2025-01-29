@@ -2,7 +2,6 @@ import pygame
 import os
 import random
 import sqlite3
-import subprocess
 
 
 class Player(pygame.sprite.Sprite):
@@ -67,7 +66,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.move_speed = 3  # Скорость движения врага
+        self.move_speed = 5  # Скорость движения врага
 
     def update(self):
         self.rect.x -= self.move_speed
@@ -102,7 +101,7 @@ def load_image(name, colorkey=None):
     return image, image_rect
 
 
-background_image, background_rect = load_image("first_level_fone.png")
+background_image, background_rect = load_image("second_level_fone.png")
 scaled_background = pygame.transform.scale(background_image, (1500, 900))
 background_rect.topleft = (0, 0)
 background_width = scaled_background.get_width()
@@ -146,24 +145,17 @@ except sqlite3.Error as e:
 finally:
     conn.close()
 
-enemy_image_path = '../data/character3.png'
+enemy_image_path = '../data/character4.png'
 all_enemies = pygame.sprite.Group()
 enemy_spawn_timer = 0
-enemy_spawn_interval = 200
-enemy_damage = 10
+enemy_spawn_interval = 100
+enemy_damage = 25
 health_text_surface = None
 health_text_rect = None
 game_over = False
 game_won = False
 game_over_font = pygame.font.Font(None, 72)
 damage_sound = pygame.mixer.Sound(os.path.join('..', 'data', 'damage.mp3'))
-
-def start_second_level():
-    pygame.quit()
-    intro_process = subprocess.Popen(["python", "second_level_intro.py"])
-    intro_process.wait()
-    second_level_process = subprocess.Popen(["python", "second_level.py"]) #Запускаем второй уровень
-    second_level_process.wait()
 
 running = True
 while running:
@@ -195,7 +187,7 @@ while running:
                 all_coins.remove(coin)
                 coins_collected += 1
                 coin_sound.play()
-                if coins_collected >= 10:
+                if coins_collected >= 25:
                      game_won = True
 
             else:
@@ -245,7 +237,6 @@ while running:
         game_win_text = game_over_font.render("Ты выиграл", True, (0, 255, 0))
         text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_win_text, text_rect)
-        start_second_level()
     pygame.display.flip()
     clock.tick(60)
 
