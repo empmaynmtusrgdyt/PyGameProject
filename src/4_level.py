@@ -112,7 +112,7 @@ coin_sound = pygame.mixer.Sound(os.path.join('..', 'data', 'coin_sound.mp3'))
 camera_x = 0
 scroll_speed = 5
 coin_spawn_timer = 0
-coin_spawn_interval = 150
+coin_spawn_interval = 50
 coins_collected = 0  # Счетчик собранных монет
 font = pygame.font.Font(None, 36)  # Шрифт для текста
 
@@ -148,7 +148,7 @@ finally:
 enemy_image_path = '../data/character6.png'
 all_enemies = pygame.sprite.Group()
 enemy_spawn_timer = 0
-enemy_spawn_interval = 80
+enemy_spawn_interval = 50
 enemy_damage = 55
 health_text_surface = None
 health_text_rect = None
@@ -187,8 +187,8 @@ while running:
                 all_coins.remove(coin)
                 coins_collected += 1
                 coin_sound.play()
-                if coins_collected >= 40:
-                     game_won = True
+                if coins_collected >= 55:
+                    game_won = True
 
             else:
                 coin.draw(screen, camera_x)
@@ -214,7 +214,7 @@ while running:
                 player.health -= enemy_damage
                 damage_sound.play()
                 if player.health <= 0:
-                   game_over = True
+                    game_over = True
 
         player.draw(screen, camera_x)
         coin_text = font.render(f"Количество монет: {coins_collected}", True, (255, 255, 0))
@@ -228,10 +228,10 @@ while running:
             health_text_rect.topleft = (10, 10)
         screen.blit(health_text_surface, health_text_rect)
     if game_over:
-          screen.fill((0, 0, 0))
-          game_over_text = game_over_font.render("Ты проиграл", True, (255, 0, 0))
-          text_rect = game_over_text.get_rect(center=(width // 2, height // 2))
-          screen.blit(game_over_text, text_rect)
+        screen.fill((0, 0, 0))
+        game_over_text = game_over_font.render("Ты проиграл", True, (255, 0, 0))
+        text_rect = game_over_text.get_rect(center=(width // 2, height // 2))
+        screen.blit(game_over_text, text_rect)
     elif game_won:
         screen.fill((0, 0, 0))
         game_win_text = game_over_font.render("Ты выиграл", True, (0, 255, 0))

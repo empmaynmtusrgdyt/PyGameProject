@@ -23,7 +23,7 @@ if __name__ == '__main__':
                 end_time = datetime.datetime.now() - start_time
                 end_time = str(end_time).split(':')
                 end_time = int(end_time[0]) + int(end_time[1]) / \
-                    60 + round(float(end_time[2]) / 3600, 4)
+                           60 + round(float(end_time[2]) / 3600, 4)
                 all_time = float([item for item in menu_instance.db_cursor.execute(
                     "SELECT time_played FROM game_settings")][-1][-1])
                 menu_instance.db_cursor.execute(

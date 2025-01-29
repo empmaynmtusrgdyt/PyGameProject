@@ -3,7 +3,6 @@ import os
 import signal
 import time
 
-
 WIDTH = 1500
 HEIGHT = 900
 WHITE = (255, 255, 255)
@@ -20,7 +19,7 @@ except pygame.error as e:
     pygame.quit()
     exit()
 
-text = font.render("Четвертый уровень: Пиратский корабль", True, WHITE)
+text = font.render("Четвертый уровень: Затерянный корабль", True, WHITE)
 text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 3))
 
 text_2 = font.render("Цель - собрать 55 монет", True, WHITE)
@@ -39,7 +38,6 @@ def handle_sigterm(signum, frame):
 
 if hasattr(signal, 'SIGTERM'):
     signal.signal(signal.SIGTERM, handle_sigterm)
-
 
 while running:
     for event in pygame.event.get():

@@ -3,7 +3,6 @@ import os
 import signal
 import time
 
-
 WIDTH = 1500
 HEIGHT = 900
 WHITE = (255, 255, 255)
@@ -39,7 +38,6 @@ def handle_sigterm(signum, frame):
 
 if hasattr(signal, 'SIGTERM'):
     signal.signal(signal.SIGTERM, handle_sigterm)
-
 
 while running:
     for event in pygame.event.get():
