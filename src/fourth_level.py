@@ -2,6 +2,59 @@ import pygame
 import os
 import random
 import sqlite3
+import signal
+import time
+
+
+def intro():
+    WIDTH = 1500
+    HEIGHT = 900
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Jumper Game")
+
+    font_path = os.path.join("data", "first_level_intro_font.ttf")
+    try:
+        font = pygame.font.Font(font_path, 74)
+    except pygame.error as e:
+        print(f"Ошибка загрузки шрифта: {e}")
+        pygame.quit()
+        exit()
+
+    text = font.render("Четвертый уровень: Затерянный корабль", True, WHITE)
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 3))
+
+    text_2 = font.render("Цель - собрать 55 монет", True, WHITE)
+    text_2_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    running = True
+    clock = pygame.time.Clock()
+    start_time = time.time()
+    shutdown = False
+
+
+    def handle_sigterm(signum, frame):
+        global shutdown
+        shutdown = True
+        pygame.quit()
+
+
+    if hasattr(signal, 'SIGTERM'):
+        signal.signal(signal.SIGTERM, handle_sigterm)
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or shutdown:
+                running = False
+        screen.fill(BLACK)
+        screen.blit(text, text_rect)
+        screen.blit(text_2, text_2_rect)
+        pygame.display.flip()
+        clock.tick(60)
+        if time.time() - start_time >= 3 or shutdown:
+            running = False
+
 
 
 class Player(pygame.sprite.Sprite):
@@ -76,6 +129,7 @@ class Enemy(pygame.sprite.Sprite):
 
 
 pygame.init()
+intro()
 size = width, height = 1500, 900
 PURPLE = (139, 0, 255)
 screen = pygame.display.set_mode(size)
@@ -84,7 +138,7 @@ clock = pygame.time.Clock()
 
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join('..', 'data', name)
+    fullname = os.path.join('data', name)
     try:
         image = pygame.image.load(fullname)
     except pygame.error as message:
@@ -106,9 +160,9 @@ scaled_background = pygame.transform.scale(background_image, (1500, 900))
 background_rect.topleft = (0, 0)
 background_width = scaled_background.get_width()
 
-coin_image_path = '../data/coin.png'
+coin_image_path = 'coin.png'
 all_coins = pygame.sprite.Group()
-coin_sound = pygame.mixer.Sound(os.path.join('..', 'data', 'coin_sound.mp3'))
+coin_sound = pygame.mixer.Sound(os.path.join('data', 'coin_sound.mp3'))
 camera_x = 0
 scroll_speed = 5
 coin_spawn_timer = 0
@@ -127,7 +181,7 @@ try:
         "character1.png": {"health": 150, "speed": 100},
         "character2.png": {"health": 100, "speed": 150}
     }
-    player_image_path = f'../data/{selected_character}'
+    player_image_path = selected_character
     player_health = player_stats[selected_character]['health']
     player_speed = player_stats[selected_character]['speed']
     player = Player(50, 860 - 70, player_image_path, player_health, player_speed)
@@ -138,14 +192,14 @@ except sqlite3.Error as e:
         "character1.png": {"health": 150, "speed": 100},
         "character2.png": {"health": 100, "speed": 150}
     }
-    player_image_path = f'../data/{selected_character}'
+    
     player_health = player_stats[selected_character]['health']
     player_speed = player_stats[selected_character]['speed']
     player = Player(50, 860 - 70, player_image_path, player_health, player_speed)
 finally:
     conn.close()
 
-enemy_image_path = '../data/character6.png'
+enemy_image_path = 'character6.png'
 all_enemies = pygame.sprite.Group()
 enemy_spawn_timer = 0
 enemy_spawn_interval = 50
@@ -155,7 +209,7 @@ health_text_rect = None
 game_over = False
 game_won = False
 game_over_font = pygame.font.Font(None, 72)
-damage_sound = pygame.mixer.Sound(os.path.join('..', 'data', 'damage.mp3'))
+damage_sound = pygame.mixer.Sound(os.path.join('data', 'damage.mp3'))
 
 running = True
 while running:

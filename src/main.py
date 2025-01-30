@@ -33,6 +33,8 @@ if __name__ == '__main__':
 
         if menu_instance.showing_skin_selector:
             menu_instance.draw_skin_selector()
+        elif menu_instance.showing_level_list:
+            menu_instance.open_level_list()
         elif menu_instance.showing_settings:
             menu_instance.open_settings()
         else:

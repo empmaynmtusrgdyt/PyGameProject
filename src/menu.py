@@ -5,7 +5,6 @@ from pygame_widgets.button import Button as PygameWidgetsButton
 from pygame_widgets.textbox import TextBox
 import sqlite3
 import subprocess
-
 pygame.init()
 
 
@@ -36,7 +35,7 @@ class Button():
         try:
             icon_image = pygame.transform.scale(
                 pygame.image.load(os.path.join(
-                    '..', 'data', self.icon_path)).convert_alpha(),
+                    'data', self.icon_path)).convert_alpha(),
                 (int(self.radius * 1.2), int(self.radius * 1.2)))
             icon_rect = icon_image.get_rect(center=(self.radius, self.radius))
             button_image.blit(icon_image, icon_rect)
@@ -93,7 +92,7 @@ class Menu():
         self.centre_button = Button(screen, self.screen_width // 2, self.screen_height // 2, self.button_radius,
                                     (0, 255, 0), (80, 200, 120), (0, 165, 80),
                                     "Начать игру",
-                                    self.font, "icon-play.png", self.start_game)
+                                    self.font, "icon-play.png", self.open_level_list)
         self.right_button = Button(screen, self.screen_width // 2 + self.button_spacing, self.screen_height // 2,
                                    self.button_radius,
                                    (0, 0, 255), (102, 0, 255), (0, 0, 139),
@@ -110,14 +109,15 @@ class Menu():
         self.menu_music_is_playing = [item for item in self.db_cursor.execute(
             'SELECT music_is_playing FROM game_settings')][-1][-1]
         self.showing_settings = False
+        self.showing_level_list = False
         self.showing_account_management = False
         self.settings_screen = None
         self.showing_skin_selector = False
         self.skin_selector_screen = None
         self.skin_selector_buttons = None
-        self.click_sound = pygame.mixer.Sound('../data/click.mp3')
+        self.click_sound = pygame.mixer.Sound('data/click.mp3')
         self.click_sound.set_volume(35)
-        self.menu_music = pygame.mixer.Sound('../data/menu.wav')
+        self.menu_music = pygame.mixer.Sound('data/menu.wav')
         self.character_names = ["character1.png", "character2.png"]
         self.showing_skin_selector = False
         self.skin_selector_screen = None
@@ -135,7 +135,7 @@ class Menu():
             self.menu_music.stop()
 
     def load_image(self, name, colorkey=None, scale=None, pos=None):
-        fullname = os.path.join('..', 'data', name)
+        fullname = os.path.join('data', name)
 
         try:
             image = pygame.image.load(fullname).convert()
@@ -159,7 +159,7 @@ class Menu():
         return scaled_image, image_rect
 
     def load_font(self, name, size):
-        fullname = os.path.join('..', 'data', name)
+        fullname = os.path.join('data', name)
         try:
             font = pygame.font.Font(fullname, size)
         except pygame.error as message:
@@ -180,12 +180,74 @@ class Menu():
         self.centre_button.draw()
         self.right_button.draw()
         self.left_button.draw()
-
-    def start_game(self):
-        subprocess.Popen(['python', 'first_level_intro.py'])
-        time.sleep(3)
-        subprocess.Popen(['python', 'first_level_intro.py']).kill()
-        subprocess.Popen(['python', 'first_level.py'])
+        
+    def open_level_list(self): 
+        if not self.showing_level_list:  # Проверяем, отображается ли уже окно выбора скина
+            self.showing_level_list = True
+            self.screen_level_list = pygame.display.set_mode((1000, 600))
+            self.screen_level_list.fill((66, 170, 255))
+            self.build_level_list()
+            self.right_button.button.hide()
+            self.centre_button.button.hide()
+            self.left_button.button.hide()
+        
+        
+    def build_level_list(self): 
+        self.first_btn = PygameWidgetsButton(self.screen_level_list, 100, 100, 800, 50)
+        self.second_btn = PygameWidgetsButton(self.screen_level_list, 100, 160, 800, 50)
+        self.third_btn = PygameWidgetsButton(self.screen_level_list, 100, 220, 800, 50)
+        self.fourth_btn = PygameWidgetsButton(self.screen_level_list, 100, 280, 800, 50)
+        self.btn_of_infinity = PygameWidgetsButton(self.screen_level_list, 100, 340, 800, 50)
+        self.leave_from_ll = PygameWidgetsButton(self.screen_level_list, 100, 490, 800, 100)
+        self.first_btn.font = self.second_btn.font = self.third_btn.font = self.fourth_btn.font = self.btn_of_infinity.font = self.leave_from_ll.font = self.font
+        self.first_btn.setText('Первый уровень')
+        self.second_btn.setText('Второй уровень')
+        self.third_btn.setText("Третий уровень")
+        self.fourth_btn.setText('Четвертый уровень')
+        self.btn_of_infinity.setText('Infinity Mode')
+        self.leave_from_ll.setText('Назад')
+        self.first_btn.setOnClick(self.open_first_level)
+        self.second_btn.setOnClick(self.open_second_level)
+        self.third_btn.setOnClick(self.open_third_level)
+        self.fourth_btn.setOnClick(self.open_fourth_level)
+        self.btn_of_infinity.setOnClick(self.open_infinity_level)
+        self.leave_from_ll.setOnClick(self.leave_level_list)
+        self.first_btn.show()
+        self.second_btn.show()
+        self.third_btn.show()
+        self.fourth_btn.show()
+        self.btn_of_infinity.show()
+        self.leave_from_ll.show()
+        self.click_sound.play()
+    
+    def leave_level_list(self):
+        self.first_btn.hide()
+        self.second_btn.hide()
+        self.third_btn.hide()
+        self.fourth_btn.hide()
+        self.btn_of_infinity.hide()
+        self.leave_from_ll.hide()
+        self.centre_button.button.show()
+        self.right_button.button.show()
+        self.left_button.button.show()
+        self.showing_level_list = False
+        self.click_sound.play()
+        
+    def open_first_level(self): 
+        subprocess.Popen(['python', 'src\\first_level.py'])
+        
+    def open_second_level(self): 
+        subprocess.Popen(['python', 'src\\second_level.py'])
+        
+    def open_third_level(self): 
+        subprocess.Popen(['python', 'src\\third_level.py'])
+        
+    def open_fourth_level(self): 
+        subprocess.Popen(['python', 'src\\fourth_level.py'])
+        
+    def open_infinity_level(self):
+        pass
+    
 
     def select_skin(self):
         if not self.showing_skin_selector:  # Проверяем, отображается ли уже окно выбора скина
@@ -220,7 +282,7 @@ class Menu():
             try:
                 character_image = pygame.transform.scale(
                     pygame.image.load(os.path.join(
-                        '..', 'data', self.character_names[self.current_character_index])).convert_alpha(),
+                        'data', self.character_names[self.current_character_index])).convert_alpha(),
                     (400, 400))
                 self.skin_selector_screen.blit(character_image, (400, 30))
             except pygame.error as e:
@@ -253,7 +315,7 @@ class Menu():
                                         self.button_radius,
                                         (0, 255, 0), (80, 200, 120), (0, 165, 80),
                                         "Начать игру",
-                                        self.font, "icon-play.png", self.start_game)
+                                        self.font, "icon-play.png", self.open_level_list)
             self.right_button = Button(self.screen, self.screen_width // 2 + self.button_spacing,
                                        self.screen_height // 2,
                                        self.button_radius,
