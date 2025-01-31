@@ -1,10 +1,11 @@
-import pygame
-import os
-import time
 from pygame_widgets.button import Button as PygameWidgetsButton
 from pygame_widgets.textbox import TextBox
+from subprocess import Popen
 import sqlite3
-import subprocess
+import pygame
+import os
+
+
 pygame.init()
 
 
@@ -44,7 +45,7 @@ class Button():
 
         button = PygameWidgetsButton(
             self.screen, self.x - self.radius, self.y - self.radius,
-                         self.radius * 2, self.radius * 2,
+            self.radius * 2, self.radius * 2,
             inactiveColour=self.color,
             hoverColour=self.hover_color,
             pressedColour=self.pressed_color,
@@ -127,6 +128,12 @@ class Menu():
             "character1.png": {"health": 150, "speed": 100, "name": "Red-BSD"},
             "character2.png": {"health": 100, "speed": 150, "name": "Blue-BSD"}
         }
+        self.levels_buttons_colors = {
+            0: [(235, 128, 52), (255, 155, 52), (125, 125, 52)],
+            1: [(0, 255, 0), (0, 200, 0), (0, 150, 0)],
+            -1: ['GRAY', "GRAY", "GRAY"]
+        }
+
         self.selected_character = self.load_selected_character()
 
         if self.menu_music_is_playing:
@@ -180,8 +187,8 @@ class Menu():
         self.centre_button.draw()
         self.right_button.draw()
         self.left_button.draw()
-        
-    def open_level_list(self): 
+
+    def open_level_list(self):
         if not self.showing_level_list:  # Проверяем, отображается ли уже окно выбора скина
             self.showing_level_list = True
             self.screen_level_list = pygame.display.set_mode((1000, 600))
@@ -190,15 +197,22 @@ class Menu():
             self.right_button.button.hide()
             self.centre_button.button.hide()
             self.left_button.button.hide()
-        
-        
-    def build_level_list(self): 
-        self.first_btn = PygameWidgetsButton(self.screen_level_list, 100, 100, 800, 50)
-        self.second_btn = PygameWidgetsButton(self.screen_level_list, 100, 160, 800, 50)
-        self.third_btn = PygameWidgetsButton(self.screen_level_list, 100, 220, 800, 50)
-        self.fourth_btn = PygameWidgetsButton(self.screen_level_list, 100, 280, 800, 50)
-        self.btn_of_infinity = PygameWidgetsButton(self.screen_level_list, 100, 340, 800, 50)
-        self.leave_from_ll = PygameWidgetsButton(self.screen_level_list, 100, 490, 800, 100)
+
+    def build_level_list(self):
+        self.lbc = list(item for item in self.db_cursor.execute(
+            'SELECT * FROM GAME_PROCESS'))[0]
+        self.first_btn = PygameWidgetsButton(
+            self.screen_level_list, 100, 100, 800, 50, inactiveColour=self.levels_buttons_colors[self.lbc[0]][0], hoverColour=self.levels_buttons_colors[self.lbc[0]][1], pressedColour=self.levels_buttons_colors[self.lbc[0]][2])
+        self.second_btn = PygameWidgetsButton(
+            self.screen_level_list, 100, 160, 800, 50, inactiveColour=self.levels_buttons_colors[self.lbc[1]][0], hoverColour=self.levels_buttons_colors[self.lbc[1]][1], pressedColour=self.levels_buttons_colors[self.lbc[1]][2])
+        self.third_btn = PygameWidgetsButton(
+            self.screen_level_list, 100, 220, 800, 50, inactiveColour=self.levels_buttons_colors[self.lbc[2]][0], hoverColour=self.levels_buttons_colors[self.lbc[2]][1], pressedColour=self.levels_buttons_colors[self.lbc[2]][2])
+        self.fourth_btn = PygameWidgetsButton(
+            self.screen_level_list, 100, 280, 800, 50, inactiveColour=self.levels_buttons_colors[self.lbc[3]][0], hoverColour=self.levels_buttons_colors[self.lbc[3]][1], pressedColour=self.levels_buttons_colors[self.lbc[3]][2])
+        self.btn_of_infinity = PygameWidgetsButton(
+            self.screen_level_list, 100, 340, 800, 50, inactiveColour=self.levels_buttons_colors[self.lbc[4]][0], hoverColour=self.levels_buttons_colors[self.lbc[4]][1], pressedColour=self.levels_buttons_colors[self.lbc[4]][2])
+        self.leave_from_ll = PygameWidgetsButton(
+            self.screen_level_list, 100, 490, 800, 100)
         self.first_btn.font = self.second_btn.font = self.third_btn.font = self.fourth_btn.font = self.btn_of_infinity.font = self.leave_from_ll.font = self.font
         self.first_btn.setText('Первый уровень')
         self.second_btn.setText('Второй уровень')
@@ -219,7 +233,7 @@ class Menu():
         self.btn_of_infinity.show()
         self.leave_from_ll.show()
         self.click_sound.play()
-    
+
     def leave_level_list(self):
         self.first_btn.hide()
         self.second_btn.hide()
@@ -232,22 +246,25 @@ class Menu():
         self.left_button.button.show()
         self.showing_level_list = False
         self.click_sound.play()
-        
-    def open_first_level(self): 
-        subprocess.Popen(['python', 'src\\first_level.py'])
-        
-    def open_second_level(self): 
-        subprocess.Popen(['python', 'src\\second_level.py'])
-        
-    def open_third_level(self): 
-        subprocess.Popen(['python', 'src\\third_level.py'])
-        
-    def open_fourth_level(self): 
-        subprocess.Popen(['python', 'src\\fourth_level.py'])
-        
+
+    def open_first_level(self):
+        pygame.quit()
+        Popen(['python', 'src\\first_level.py'])
+
+    def open_second_level(self):
+        pygame.quit()
+        Popen(['python', 'src\\second_level.py'])
+
+    def open_third_level(self):
+        pygame.quit()
+        Popen(['python', 'src\\third_level.py'])
+
+    def open_fourth_level(self):
+        pygame.quit()
+        Popen(['python', 'src\\fourth_level.py'])
+
     def open_infinity_level(self):
         pass
-    
 
     def select_skin(self):
         if not self.showing_skin_selector:  # Проверяем, отображается ли уже окно выбора скина
@@ -287,12 +304,15 @@ class Menu():
                 self.skin_selector_screen.blit(character_image, (400, 30))
             except pygame.error as e:
                 print(f"Ошибка загрузки картинки персонажа: {
-                self.character_names[self.current_character_index]}. {e}")
+                    self.character_names[self.current_character_index]}. {e}")
 
             stats = self.character_stats[self.character_names[self.current_character_index]]
-            name_text = self.render_text(stats['name'], self.small_font, (0, 0, 0))
-            health_text = self.render_text(f"Здоровье: {stats['health']}", self.font, (0, 0, 0))
-            speed_text = self.render_text(f"Скорость: {stats['speed']}", self.font, (0, 0, 0))
+            name_text = self.render_text(
+                stats['name'], self.small_font, (0, 0, 0))
+            health_text = self.render_text(
+                f"Здоровье: {stats['health']}", self.font, (0, 0, 0))
+            speed_text = self.render_text(
+                f"Скорость: {stats['speed']}", self.font, (0, 0, 0))
             self.skin_selector_screen.blit(name_text[0], (515, 0))
             self.skin_selector_screen.blit(health_text[0], (425, 420))
             self.skin_selector_screen.blit(speed_text[0], (425, 470))
@@ -330,7 +350,7 @@ class Menu():
 
     def next_skin(self):
         self.current_character_index = (
-                                               self.current_character_index + 1) % len(self.character_names)
+            self.current_character_index + 1) % len(self.character_names)
         self.draw_skin_selector()
         self.click_sound.play()
 
@@ -402,7 +422,8 @@ class Menu():
         self.quit.setText('МЕНЮ')
         self.quit.setOnClick(self.leave_settings)
         self.account_button = Button(self.settings_screen, 700, 300, 100, (235, 128, 52),
-                                     (255, 155, 52), (125, 125, 52), 'Аккаунт', self.font, 'account.png',
+                                     (255, 155, 52), (125, 125,
+                                                      52), 'Аккаунт', self.font, 'account.png',
                                      self.account_manage)
         self.account_button.draw()
 
@@ -414,12 +435,16 @@ class Menu():
             self.quit.hide()
             self.account_screen = pygame.display.set_mode((1000, 600))
             self.account_screen.fill((66, 170, 255))
-            self.quit_from_account_management = PygameWidgetsButton(self.account_screen, 350, 490, 300, 100)
+            self.quit_from_account_management = PygameWidgetsButton(
+                self.account_screen, 350, 490, 300, 100)
             self.quit_from_account_management.font = self.font
-            self.quit_from_account_management.setOnClick(self.leave_account_manage)
+            self.quit_from_account_management.setOnClick(
+                self.leave_account_manage)
             self.quit_from_account_management.setText('Назад')
-            self.text = f'За всё время Вы наиграли {round(float([item for item in self.db_cursor.execute('SELECT time_played FROM game_settings')][-1][-1]), 1)}'
-            self.info_about_account = TextBox(self.account_screen, 100, 100, 800, 100)
+            self.text = f'За всё время Вы наиграли {round(float(
+                [item for item in self.db_cursor.execute('SELECT time_played FROM game_settings')][-1][-1]), 1)}'
+            self.info_about_account = TextBox(
+                self.account_screen, 100, 100, 800, 100)
             self.info_about_account.disable()
             self.info_about_account.font = self.font
             self.info_about_account.setText(self.text + ' ч.')
@@ -457,5 +482,5 @@ class Menu():
         self.click_sound.play()
 
         self.db_cursor.execute(f'UPDATE game_settings SET music_is_playing={
-        self.menu_music_is_playing}')
+            self.menu_music_is_playing}')
         self.db_connection.commit()

@@ -1,9 +1,11 @@
+from subprocess import Popen
 import pygame
 import os
 import random
 import sqlite3
 import signal
 import time
+
 
 
 def intro():
@@ -297,4 +299,6 @@ while running:
     if game_over or game_won:
         pygame.time.delay(2000)
         running = False
+
 pygame.quit()
+Popen(['python', 'src\\main.py'])

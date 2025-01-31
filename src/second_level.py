@@ -1,3 +1,4 @@
+from subprocess import Popen
 import pygame
 import os
 import random
@@ -5,6 +6,7 @@ import sqlite3
 import subprocess
 import signal
 import time
+
 
 def intro():
     WIDTH = 1500
@@ -33,12 +35,10 @@ def intro():
     start_time = time.time()
     shutdown = False
 
-
     def handle_sigterm(signum, frame):
         global shutdown
         shutdown = True
         pygame.quit()
-
 
     if hasattr(signal, 'SIGTERM'):
         signal.signal(signal.SIGTERM, handle_sigterm)
@@ -172,9 +172,11 @@ font = pygame.font.Font(None, 36)  # Шрифт для текста
 conn = sqlite3.connect('game_data.db')
 cursor = conn.cursor()
 try:
-    cursor.execute("SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'")
+    cursor.execute(
+        "SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'")
     result = cursor.fetchone()
-    selected_character = result[0] if result else "character1.png"  # Ставим character1.png по умолчанию если не найдено
+    # Ставим character1.png по умолчанию если не найдено
+    selected_character = result[0] if result else "character1.png"
 
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
@@ -183,7 +185,8 @@ try:
     player_image_path = selected_character
     player_health = player_stats[selected_character]['health']
     player_speed = player_stats[selected_character]['speed']
-    player = Player(50, 860 - 70, player_image_path, player_health, player_speed)
+    player = Player(50, 860 - 70, player_image_path,
+                    player_health, player_speed)
 except sqlite3.Error as e:
     print(f"Ошибка при загрузке данных персонажа: {e}")
     selected_character = "character1.png"
@@ -194,7 +197,8 @@ except sqlite3.Error as e:
     player_image_path = selected_character
     player_health = player_stats[selected_character]['health']
     player_speed = player_stats[selected_character]['speed']
-    player = Player(50, 860 - 70, player_image_path, player_health, player_speed)
+    player = Player(50, 860 - 70, player_image_path,
+                    player_health, player_speed)
 finally:
     conn.close()
 
@@ -215,7 +219,8 @@ def start_second_level():
     pygame.quit()
     intro_process = subprocess.Popen(["python", "src\\third_level_intro.py"])
     intro_process.wait()
-    second_level_process = subprocess.Popen(["python", "src\\third_level.py"])  # Запускаем третий уровень
+    second_level_process = subprocess.Popen(
+        ["python", "src\\third_level.py"])  # Запускаем третий уровень
     second_level_process.wait()
 
 
@@ -279,19 +284,22 @@ while running:
                     game_over = True
 
         player.draw(screen, camera_x)
-        coin_text = font.render(f"Количество монет: {coins_collected}", True, (255, 255, 0))
+        coin_text = font.render(f"Количество монет: {
+                                coins_collected}", True, (255, 255, 0))
         text_rect = coin_text.get_rect()
         text_rect.topright = (width - 10, 10)
         screen.blit(coin_text, text_rect)
 
-        health_text_surface = font.render(f"Здоровье: {player.health}", True, (255, 0, 0))
+        health_text_surface = font.render(
+            f"Здоровье: {player.health}", True, (255, 0, 0))
         if health_text_rect is None:
             health_text_rect = health_text_surface.get_rect()
             health_text_rect.topleft = (10, 10)
         screen.blit(health_text_surface, health_text_rect)
     if game_over:
         screen.fill((0, 0, 0))
-        game_over_text = game_over_font.render("Ты проиграл", True, (255, 0, 0))
+        game_over_text = game_over_font.render(
+            "Ты проиграл", True, (255, 0, 0))
         text_rect = game_over_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_over_text, text_rect)
     elif game_won:
@@ -306,4 +314,6 @@ while running:
     if game_over or game_won:
         pygame.time.delay(2000)
         running = False
+        
 pygame.quit()
+Popen(['python', 'src\\main.py'])

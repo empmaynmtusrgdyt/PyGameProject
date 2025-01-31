@@ -1,3 +1,4 @@
+from subprocess import Popen
 import pygame
 import os
 import random
@@ -313,4 +314,6 @@ while running:
     if game_over or game_won:
         pygame.time.delay(2000)
         running = False
+        
 pygame.quit()
+Popen(['python', 'src\\main.py'])
