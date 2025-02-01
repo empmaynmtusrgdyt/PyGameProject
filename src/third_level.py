@@ -8,6 +8,11 @@ import signal
 import time
 import ctypes
 
+
+pygame.init()
+win_sound = pygame.mixer.Sound('data\win_sound.mp3')
+lose_sound = pygame.mixer.Sound('data\lose_sound.mp3')
+intro_sound = pygame.mixer.Sound('data\start_of_level.mp3')
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
     'mycompany.myproduct.subproduct.version')
 
@@ -17,7 +22,6 @@ def intro():
     HEIGHT = 900
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
-    pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Jumper Game")
     pygame.display.set_icon(pygame.image.load('data/character1.png'))
@@ -38,7 +42,8 @@ def intro():
     clock = pygame.time.Clock()
     start_time = time.time()
     shutdown = False
-
+    intro_sound.play()
+    
     def handle_sigterm(signum, frame):
         global shutdown
         shutdown = True
@@ -170,7 +175,7 @@ camera_x = 0
 scroll_speed = 5
 coin_spawn_timer = 0
 coin_spawn_interval = 70
-coins_collected = 39  # Счетчик собранных монет
+coins_collected = 0  # Счетчик собранных монет
 font = pygame.font.Font(None, 36)  # Шрифт для текста
 
 conn = sqlite3.connect('game_data.db')
@@ -255,7 +260,8 @@ while running:
             if player.rect.colliderect(coin.rect):
                 all_coins.remove(coin)
                 coins_collected += 1
-                coin_sound.play()
+                if coins_collected < 40:
+                    coin_sound.play()
                 if coins_collected >= 40:
                     game_won = True
 
@@ -281,10 +287,11 @@ while running:
             if player.rect.colliderect(enemy.rect):
                 all_enemies.remove(enemy)
                 player.health -= enemy_damage
-                damage_sound.play()
                 if player.health <= 0:
                     game_over = True
-
+                if not game_over:
+                    damage_sound.play()
+                    
         player.draw(screen, camera_x)
         coin_text = font.render(f"Количество монет: {
                                 coins_collected}", True, (255, 255, 0))
@@ -304,23 +311,26 @@ while running:
             "Ты проиграл", True, (255, 0, 0))
         text_rect = game_over_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_over_text, text_rect)
+        lose_sound.play()
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        running = False
     elif game_won:
         with sqlite3.connect('game_data.db') as db:
             db.cursor().execute('UPDATE GAME_PROCESS SET THIRD_LEVEL = 1')
-            if db.cursor().execute('SELECT FOURTH_LEVEL FROM GAME_PROCESS') == -1:
+            if list(db.cursor().execute('SELECT FOURTH_LEVEL FROM GAME_PROCESS'))[0][0] == -1:
                 db.cursor().execute('UPDATE GAME_PROCESS SET FOURTHЫ_LEVEL = 0')
             db.commit()
         screen.fill((0, 0, 0))
-        game_win_text = game_over_font.render("Ты выиграл", True, (0, 255, 0))
+        game_win_text = game_over_font.render("Поздравляем! Ты прошел третий уровень! Идем дальше...", True, (0, 255, 0))
         text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_win_text, text_rect)
+        win_sound.play()
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        running = False
         start_second_level()
     else:
         pygame.display.flip()
     clock.tick(60)
-
-    if game_over or game_won:
-        pygame.time.delay(2000)
-        running = False
-
 pygame.quit()

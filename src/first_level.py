@@ -1,5 +1,5 @@
 import ctypes
-from subprocess import Popen
+from time import sleep
 import pygame
 import os
 import signal
@@ -7,8 +7,11 @@ import time
 import random
 import sqlite3
 import subprocess
-pygame.init()
 
+pygame.init()
+win_sound = pygame.mixer.Sound('data\win_sound.mp3')
+lose_sound = pygame.mixer.Sound('data\lose_sound.mp3')
+intro_sound = pygame.mixer.Sound('data\start_of_level.mp3')
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
     'mycompany.myproduct.subproduct.version')
 
@@ -38,6 +41,8 @@ def intro():
     clock = pygame.time.Clock()
     start_time = time.time()
     shutdown = False
+    intro_sound
+    intro_sound.play()
 
     def handle_sigterm(signum, frame):
         global shutdown
@@ -256,7 +261,8 @@ while running:
             if player.rect.colliderect(coin.rect):
                 all_coins.remove(coin)
                 coins_collected += 1
-                coin_sound.play()
+                if coins_collected < 10:
+                    coin_sound.play()
                 if coins_collected >= 10:
                     game_won = True
 
@@ -282,10 +288,10 @@ while running:
             if player.rect.colliderect(enemy.rect):
                 all_enemies.remove(enemy)
                 player.health -= enemy_damage
-                damage_sound.play()
                 if player.health <= 0:
                     game_over = True
-
+                if not game_over:
+                    damage_sound.play()
         player.draw(screen, camera_x)
         coin_text = font.render(f"Количество монет: {
                                 coins_collected}", True, (255, 255, 0))
@@ -305,6 +311,10 @@ while running:
             "Ты проиграл", True, (255, 0, 0))
         text_rect = game_over_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_over_text, text_rect)
+        lose_sound.play()
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        running = False
     elif game_won:
         with sqlite3.connect('game_data.db') as db:
             db.cursor().execute('UPDATE GAME_PROCESS SET FIRST_LEVEL = 1')
@@ -316,7 +326,14 @@ while running:
             "Поздравляем! Ты прошел первый уровень. На очереди: \nСледующий", True, (0, 255, 0))
         text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_win_text, text_rect)
-
+        screen.fill((0, 0, 0))
+        game_win_text = game_over_font.render("Поздравляем! Ты прошел первый уровень! Идем дальше...", True, (0, 255, 0))
+        text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
+        screen.blit(game_win_text, text_rect)
+        win_sound.play()
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        running = False
         start_second_level()
     pygame.display.flip()
     clock.tick(60)
@@ -326,3 +343,4 @@ while running:
         running = False
 
 pygame.quit()
+
