@@ -188,7 +188,8 @@ try:
 
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
-        "character2.png": {"health": 100, "speed": 150}
+        "character2.png": {"health": 100, "speed": 150},
+        "character33.png": {"health": 100, "speed": 150}
     }
     player_image_path = selected_character
     player_health = player_stats[selected_character]['health']
@@ -200,7 +201,8 @@ except sqlite3.Error as e:
     selected_character = "character1.png"
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
-        "character2.png": {"health": 100, "speed": 150}
+        "character2.png": {"health": 100, "speed": 150},
+        "character33.png": {"health": 125, "speed": 125}
     }
     player_image_path = selected_character
     player_health = player_stats[selected_character]['health']
@@ -327,7 +329,8 @@ while running:
         text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_win_text, text_rect)
         screen.fill((0, 0, 0))
-        game_win_text = game_over_font.render("Поздравляем! Ты прошел первый уровень! Идем дальше...", True, (0, 255, 0))
+        game_win_text = game_over_font.render(
+            "Поздравляем! Ты прошел первый уровень! Идем дальше...", True, (0, 255, 0))
         text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_win_text, text_rect)
         win_sound.play()
@@ -343,4 +346,3 @@ while running:
         running = False
 
 pygame.quit()
-
