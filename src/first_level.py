@@ -127,7 +127,8 @@ try:
 
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
-        "character2.png": {"health": 100, "speed": 150}
+        "character2.png": {"health": 100, "speed": 150},
+        "character33.png": {"health": 100, "speed": 150}
     }
     player_image_path = f'../data/{selected_character}'
     player_health = player_stats[selected_character]['health']
@@ -138,7 +139,8 @@ except sqlite3.Error as e:
     selected_character = "character1.png"
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
-        "character2.png": {"health": 100, "speed": 150}
+        "character2.png": {"health": 125, "speed": 125},
+        "character33.png": {"health": 125, "speed": 125}
     }
     player_image_path = f'../data/{selected_character}'
     player_health = player_stats[selected_character]['health']

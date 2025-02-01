@@ -118,14 +118,15 @@ class Menu():
         self.click_sound = pygame.mixer.Sound('../data/click.mp3')
         self.click_sound.set_volume(35)
         self.menu_music = pygame.mixer.Sound('../data/menu.wav')
-        self.character_names = ["character1.png", "character2.png"]
+        self.character_names = ["character1.png", "character2.png", "character33.png"]
         self.showing_skin_selector = False
         self.skin_selector_screen = None
         self.skin_selector_buttons = None
-        self.character_names = ["character1.png", "character2.png"]
+        self.character_names = ["character1.png", "character2.png", "character33.png"]
         self.character_stats = {
             "character1.png": {"health": 150, "speed": 100, "name": "Red-BSD"},
-            "character2.png": {"health": 100, "speed": 150, "name": "Blue-BSD"}
+            "character2.png": {"health": 100, "speed": 150, "name": "Blue-BSD"},
+            "character33.png": {"health": 125, "speed": 125, "name": "Blue-BSD"}
         }
         self.selected_character = self.load_selected_character()
 
