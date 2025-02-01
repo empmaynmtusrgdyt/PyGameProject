@@ -5,14 +5,16 @@ import sqlite3
 import signal
 import subprocess
 import time
+import ctypes
 
-
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('mycompany.myproduct.subproduct.version')
 def intro():
     WIDTH = 1500
     HEIGHT = 900
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     pygame.init()
+    pygame.display.set_icon(pygame.image.load('data/character1.png'))
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Jumper Game")
 

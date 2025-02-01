@@ -1,3 +1,4 @@
+import ctypes
 from subprocess import Popen
 import pygame
 import os
@@ -8,6 +9,9 @@ import sqlite3
 import subprocess
 pygame.init()
 
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+    'mycompany.myproduct.subproduct.version')
+
 
 def intro():
     WIDTH = 1500
@@ -16,7 +20,7 @@ def intro():
     BLACK = (0, 0, 0)
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Jumper Game")
-
+    pygame.display.set_icon(pygame.image.load('data/character1.png'))
     font_path = os.path.join("data", "first_level_intro_font.ttf")
     try:
         font = pygame.font.Font(font_path, 74)

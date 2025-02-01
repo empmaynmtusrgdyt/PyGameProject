@@ -5,11 +5,10 @@ import sqlite3
 import pygame
 import main
 import os
+import ctypes
 
-
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('mycompany.myproduct.subproduct.version')
 pygame.init()
-
-
 class Button():
     def __init__(self, screen, x, y, radius, color, pressed_color, hover_color, text, font, icon_path, action,
                  text_offset_y=40):
@@ -182,6 +181,7 @@ class Menu():
         return text_surface, text_rect
 
     def draw(self):
+        pygame.display.set_icon(pygame.image.load('data/character1.png'))
         self.screen.fill((66, 170, 255))  # Используем цвет LIGHT_BLUE
         self.screen.blit(self.cloud_image, self.cloud_image_rect)
         self.screen.blit(self.title_surface, self.title_rect)

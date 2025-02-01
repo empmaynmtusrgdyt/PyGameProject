@@ -6,6 +6,10 @@ import sqlite3
 import subprocess
 import signal
 import time
+import ctypes
+
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+    'mycompany.myproduct.subproduct.version')
 
 
 def intro():
@@ -16,7 +20,7 @@ def intro():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Jumper Game")
-
+    pygame.display.set_icon(pygame.image.load('data/character1.png'))
     font_path = os.path.join("data", "first_level_intro_font.ttf")
     try:
         font = pygame.font.Font(font_path, 74)
@@ -318,5 +322,5 @@ while running:
     if game_over or game_won:
         pygame.time.delay(2000)
         running = False
-        
+
 pygame.quit()
