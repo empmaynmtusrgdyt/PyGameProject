@@ -217,10 +217,8 @@ damage_sound = pygame.mixer.Sound(os.path.join('data', 'damage.mp3'))
 
 def start_second_level():
     pygame.quit()
-    intro_process = subprocess.Popen(["python", "src\\4_level_intro.py"])
-    intro_process.wait()
     second_level_process = subprocess.Popen(
-        ["python", "src\\4_level.py"])  # Запускаем четвертый уровень
+        ["python", "src\\fourth_level.py"])  # Запускаем четвертый уровень
     second_level_process.wait()
 
 
@@ -303,12 +301,18 @@ while running:
         text_rect = game_over_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_over_text, text_rect)
     elif game_won:
+        with sqlite3.connect('game_data.db') as db:
+            db.cursor().execute('UPDATE GAME_PROCESS SET THIRD_LEVEL = 1')
+            if db.cursor().execute('SELECT FOURTH_LEVEL FROM GAME_PROCESS') == -1:
+                db.cursor().execute('UPDATE GAME_PROCESS SET FOURTHЫ_LEVEL = 0')
+            db.commit()
         screen.fill((0, 0, 0))
         game_win_text = game_over_font.render("Ты выиграл", True, (0, 255, 0))
         text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_win_text, text_rect)
         start_second_level()
-    pygame.display.flip()
+    else:
+        pygame.display.flip()
     clock.tick(60)
 
     if game_over or game_won:
@@ -316,4 +320,3 @@ while running:
         running = False
         
 pygame.quit()
-Popen(['python', 'src\\main.py'])

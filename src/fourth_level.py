@@ -1,11 +1,10 @@
-from subprocess import Popen
 import pygame
 import os
 import random
 import sqlite3
 import signal
+import subprocess
 import time
-
 
 
 def intro():
@@ -35,12 +34,10 @@ def intro():
     start_time = time.time()
     shutdown = False
 
-
     def handle_sigterm(signum, frame):
         global shutdown
         shutdown = True
         pygame.quit()
-
 
     if hasattr(signal, 'SIGTERM'):
         signal.signal(signal.SIGTERM, handle_sigterm)
@@ -56,7 +53,6 @@ def intro():
         clock.tick(60)
         if time.time() - start_time >= 3 or shutdown:
             running = False
-
 
 
 class Player(pygame.sprite.Sprite):
@@ -157,6 +153,13 @@ def load_image(name, colorkey=None):
     return image, image_rect
 
 
+def start_second_level():
+    pygame.quit()
+    second_level_process = subprocess.Popen(
+        ["python", "src\\infinity_level.py"])  # Запускаем бесконечный уровень
+    second_level_process.wait()
+
+
 background_image, background_rect = load_image("4_level_fone.png")
 scaled_background = pygame.transform.scale(background_image, (1500, 900))
 background_rect.topleft = (0, 0)
@@ -175,9 +178,11 @@ font = pygame.font.Font(None, 36)  # Шрифт для текста
 conn = sqlite3.connect('game_data.db')
 cursor = conn.cursor()
 try:
-    cursor.execute("SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'")
+    cursor.execute(
+        "SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'")
     result = cursor.fetchone()
-    selected_character = result[0] if result else "character1.png"  # Ставим character1.png по умолчанию если не найдено
+    # Ставим character1.png по умолчанию если не найдено
+    selected_character = result[0] if result else "character1.png"
 
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
@@ -186,7 +191,8 @@ try:
     player_image_path = selected_character
     player_health = player_stats[selected_character]['health']
     player_speed = player_stats[selected_character]['speed']
-    player = Player(50, 860 - 70, player_image_path, player_health, player_speed)
+    player = Player(50, 860 - 70, player_image_path,
+                    player_health, player_speed)
 except sqlite3.Error as e:
     print(f"Ошибка при загрузке данных персонажа: {e}")
     selected_character = "character1.png"
@@ -194,10 +200,11 @@ except sqlite3.Error as e:
         "character1.png": {"health": 150, "speed": 100},
         "character2.png": {"health": 100, "speed": 150}
     }
-    
+
     player_health = player_stats[selected_character]['health']
     player_speed = player_stats[selected_character]['speed']
-    player = Player(50, 860 - 70, player_image_path, player_health, player_speed)
+    player = Player(50, 860 - 70, player_image_path,
+                    player_health, player_speed)
 finally:
     conn.close()
 
@@ -273,22 +280,30 @@ while running:
                     game_over = True
 
         player.draw(screen, camera_x)
-        coin_text = font.render(f"Количество монет: {coins_collected}", True, (255, 255, 0))
+        coin_text = font.render(f"Количество монет: {
+                                coins_collected}", True, (255, 255, 0))
         text_rect = coin_text.get_rect()
         text_rect.topright = (width - 10, 10)
         screen.blit(coin_text, text_rect)
 
-        health_text_surface = font.render(f"Здоровье: {player.health}", True, (255, 0, 0))
+        health_text_surface = font.render(
+            f"Здоровье: {player.health}", True, (255, 0, 0))
         if health_text_rect is None:
             health_text_rect = health_text_surface.get_rect()
             health_text_rect.topleft = (10, 10)
         screen.blit(health_text_surface, health_text_rect)
     if game_over:
         screen.fill((0, 0, 0))
-        game_over_text = game_over_font.render("Ты проиграл", True, (255, 0, 0))
+        game_over_text = game_over_font.render(
+            "Ты проиграл", True, (255, 0, 0))
         text_rect = game_over_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_over_text, text_rect)
     elif game_won:
+        with sqlite3.connect('game_data.db') as db:
+            db.cursor().execute('UPDATE GAME_PROCESS SET FOURTH_LEVEL = 1')
+            if db.cursor().execute('SELECT LEVEL_OF_INFINITY FROM GAME_PROCESS') == -1:
+                db.cursor().execute('UPDATE GAME_PROCESS SET LEVEL_OF_INFINITY = 0')
+            db.commit()
         screen.fill((0, 0, 0))
         game_win_text = game_over_font.render("Ты выиграл", True, (0, 255, 0))
         text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
@@ -301,4 +316,3 @@ while running:
         running = False
 
 pygame.quit()
-Popen(['python', 'src\\main.py'])

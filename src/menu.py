@@ -1,8 +1,9 @@
 from pygame_widgets.button import Button as PygameWidgetsButton
 from pygame_widgets.textbox import TextBox
-from subprocess import Popen
+import subprocess
 import sqlite3
 import pygame
+import main
 import os
 
 
@@ -129,9 +130,9 @@ class Menu():
             "character2.png": {"health": 100, "speed": 150, "name": "Blue-BSD"}
         }
         self.levels_buttons_colors = {
-            0: [(235, 128, 52), (255, 155, 52), (125, 125, 52)],
-            1: [(0, 255, 0), (0, 200, 0), (0, 150, 0)],
-            -1: ['GRAY', "GRAY", "GRAY"]
+            0: [(235, 128, 52), (255, 155, 52), (125, 125, 52), True],
+            1: [(0, 255, 0), (0, 200, 0), (0, 150, 0), True],
+            -1: ['GRAY', "GRAY", "GRAY", False]
         }
 
         self.selected_character = self.load_selected_character()
@@ -189,6 +190,7 @@ class Menu():
         self.left_button.draw()
 
     def open_level_list(self):
+        self.menu_music.stop()
         if not self.showing_level_list:  # Проверяем, отображается ли уже окно выбора скина
             self.showing_level_list = True
             self.screen_level_list = pygame.display.set_mode((1000, 600))
@@ -220,6 +222,12 @@ class Menu():
         self.fourth_btn.setText('Четвертый уровень')
         self.btn_of_infinity.setText('Infinity Mode')
         self.leave_from_ll.setText('Назад')
+        self.first_btn.enable() if self.levels_buttons_colors[self.lbc[0]][-1] else self.first_btn.disable()
+        self.second_btn.enable() if self.levels_buttons_colors[self.lbc[1]][-1] else self.second_btn.disable()
+        self.third_btn.enable() if self.levels_buttons_colors[self.lbc[2]][-1] else self.third_btn.disable()
+        self.fourth_btn.enable() if self.levels_buttons_colors[self.lbc[3]][-1] else self.fourth_btn.disable()
+        self.btn_of_infinity.enable() if self.levels_buttons_colors[self.lbc[4]][-1] else self.btn_of_infinity.disable()
+    
         self.first_btn.setOnClick(self.open_first_level)
         self.second_btn.setOnClick(self.open_second_level)
         self.third_btn.setOnClick(self.open_third_level)
@@ -245,25 +253,27 @@ class Menu():
         self.right_button.button.show()
         self.left_button.button.show()
         self.showing_level_list = False
+        self.menu_music.play() if self.menu_music_is_playing else self.menu_music.stop()
         self.click_sound.play()
 
     def open_first_level(self):
-        pygame.quit()
-        Popen(['python', 'src\\first_level.py'])
+        subprocess.Popen(['python', 'src\\first_level.py'])
+        self.click_sound.play()
 
     def open_second_level(self):
-        pygame.quit()
-        Popen(['python', 'src\\second_level.py'])
+        subprocess.Popen(['python', 'src\\second_level.py'])
+        self.click_sound.play()
 
     def open_third_level(self):
-        pygame.quit()
-        Popen(['python', 'src\\third_level.py'])
+        subprocess.Popen(['python', 'src\\third_level.py'])
+        self.click_sound.play()
 
     def open_fourth_level(self):
-        pygame.quit()
-        Popen(['python', 'src\\fourth_level.py'])
+        subprocess.Popen(['python', 'src\\fourth_level.py'])
+        self.click_sound.play()
 
     def open_infinity_level(self):
+        self.click_sound.play()
         pass
 
     def select_skin(self):
@@ -436,23 +446,23 @@ class Menu():
             self.account_screen = pygame.display.set_mode((1000, 600))
             self.account_screen.fill((66, 170, 255))
             self.quit_from_account_management = PygameWidgetsButton(
-                self.account_screen, 350, 490, 300, 100)
+                self.account_screen, 350, 475, 300, 100)
             self.quit_from_account_management.font = self.font
             self.quit_from_account_management.setOnClick(
                 self.leave_account_manage)
             self.quit_from_account_management.setText('Назад')
             self.text = f'За всё время Вы наиграли {round(float(
                 [item for item in self.db_cursor.execute('SELECT time_played FROM game_settings')][-1][-1]), 1)}'
-            self.info_about_account = TextBox(
-                self.account_screen, 100, 100, 800, 100)
-            self.info_about_account.disable()
-            self.info_about_account.font = self.font
-            self.info_about_account.setText(self.text + ' ч.')
+            self.account_text = self.font.render('Ваша статистика:', True, 'BLACK')
+            self.account_screen.blit(self.account_text, (100, 50))
+            self.account_text = self.font.render(f'Наиграно времени: {round(list(self.db_cursor.execute('SELECT TIME_PLAYED FROM GAME_SETTINGS'),)[0][0], 1)} ч.', True, 'BLACK')
+            self.account_screen.blit(self.account_text, (100, 150))
+            self.account_text = self.font.render(f'Собрано монет в INFINITY MODE: {list(self.db_cursor.execute('SELECT SCORE FROM GAME_PROCESS'))[0][0]}', True, 'BLACK')
+            self.account_screen.blit(self.account_text, (100, 250))
         self.click_sound.play()
 
     def leave_account_manage(self):
         self.quit_from_account_management.hide()
-        self.info_about_account.hide()
         self.settings_screen.fill((66, 170, 255))
         self.def_buttons()
         self.showing_account_management = False

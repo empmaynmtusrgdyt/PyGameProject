@@ -303,6 +303,11 @@ while running:
         text_rect = game_over_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_over_text, text_rect)
     elif game_won:
+        with sqlite3.connect('game_data.db') as db:
+            db.cursor().execute('UPDATE GAME_PROCESS SET SECOND_LEVEL = 1')
+            if db.cursor().execute('SELECT THIRD_LEVEL FROM GAME_PROCESS') == -1:
+                db.cursor().execute('UPDATE GAME_PROCESS SET THIRD_LEVEL = 0')
+            db.commit()
         screen.fill((0, 0, 0))
         game_win_text = game_over_font.render("Ты выиграл", True, (0, 255, 0))
         text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
@@ -316,4 +321,4 @@ while running:
         running = False
         
 pygame.quit()
-Popen(['python', 'src\\main.py'])
+

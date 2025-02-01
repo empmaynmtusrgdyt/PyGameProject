@@ -304,8 +304,9 @@ while running:
     elif game_won:
         with sqlite3.connect('game_data.db') as db:
             db.cursor().execute('UPDATE GAME_PROCESS SET FIRST_LEVEL = 1')
+            if list(db.cursor().execute('SELECT SECOND_LEVEL FROM GAME_PROCESS'))[0][0] == -1:
+                db.cursor().execute('UPDATE GAME_PROCESS SET SECOND_LEVEL = 0')
             db.commit()
-
         screen.fill((0, 0, 0))
         game_win_text = game_over_font.render(
             "Поздравляем! Ты прошел первый уровень. На очереди: \nСледующий", True, (0, 255, 0))
@@ -321,4 +322,3 @@ while running:
         running = False
 
 pygame.quit()
-Popen(['python', 'src\\main.py'])
