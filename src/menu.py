@@ -7,8 +7,11 @@ import main
 import os
 import ctypes
 
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('mycompany.myproduct.subproduct.version')
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+    'mycompany.myproduct.subproduct.version')
 pygame.init()
+
+
 class Button():
     def __init__(self, screen, x, y, radius, color, pressed_color, hover_color, text, font, icon_path, action,
                  text_offset_y=40):
@@ -119,14 +122,17 @@ class Menu():
         self.click_sound = pygame.mixer.Sound('data/click.mp3')
         self.click_sound.set_volume(35)
         self.menu_music = pygame.mixer.Sound('data/menu.wav')
-        self.character_names = ["character1.png", "character2.png"]
+        self.character_names = ["character1.png",
+                                "character2.png", "character33.png"]
         self.showing_skin_selector = False
         self.skin_selector_screen = None
         self.skin_selector_buttons = None
-        self.character_names = ["character1.png", "character2.png"]
+        self.character_names = ["character1.png",
+                                "character2.png", "character33.png"]
         self.character_stats = {
             "character1.png": {"health": 150, "speed": 100, "name": "Red-BSD"},
-            "character2.png": {"health": 100, "speed": 150, "name": "Blue-BSD"}
+            "character2.png": {"health": 100, "speed": 150, "name": "Blue-BSD"},
+            "character33.png": {"health": 125, "speed": 125, "name": "Blue-BSD"}
         }
         self.levels_buttons_colors = {
             0: [(235, 128, 52), (255, 155, 52), (125, 125, 52), True],
@@ -222,12 +228,17 @@ class Menu():
         self.fourth_btn.setText('Четвертый уровень')
         self.btn_of_infinity.setText('Infinity Mode')
         self.leave_from_ll.setText('Назад')
-        self.first_btn.enable() if self.levels_buttons_colors[self.lbc[0]][-1] else self.first_btn.disable()
-        self.second_btn.enable() if self.levels_buttons_colors[self.lbc[1]][-1] else self.second_btn.disable()
-        self.third_btn.enable() if self.levels_buttons_colors[self.lbc[2]][-1] else self.third_btn.disable()
-        self.fourth_btn.enable() if self.levels_buttons_colors[self.lbc[3]][-1] else self.fourth_btn.disable()
-        self.btn_of_infinity.enable() if self.levels_buttons_colors[self.lbc[4]][-1] else self.btn_of_infinity.disable()
-    
+        self.first_btn.enable(
+        ) if self.levels_buttons_colors[self.lbc[0]][-1] else self.first_btn.disable()
+        self.second_btn.enable(
+        ) if self.levels_buttons_colors[self.lbc[1]][-1] else self.second_btn.disable()
+        self.third_btn.enable(
+        ) if self.levels_buttons_colors[self.lbc[2]][-1] else self.third_btn.disable()
+        self.fourth_btn.enable(
+        ) if self.levels_buttons_colors[self.lbc[3]][-1] else self.fourth_btn.disable()
+        self.btn_of_infinity.enable(
+        ) if self.levels_buttons_colors[self.lbc[4]][-1] else self.btn_of_infinity.disable()
+
         self.first_btn.setOnClick(self.open_first_level)
         self.second_btn.setOnClick(self.open_second_level)
         self.third_btn.setOnClick(self.open_third_level)
@@ -453,11 +464,14 @@ class Menu():
             self.quit_from_account_management.setText('Назад')
             self.text = f'За всё время Вы наиграли {round(float(
                 [item for item in self.db_cursor.execute('SELECT time_played FROM game_settings')][-1][-1]), 1)}'
-            self.account_text = self.font.render('Ваша статистика:', True, 'BLACK')
+            self.account_text = self.font.render(
+                'Ваша статистика:', True, 'BLACK')
             self.account_screen.blit(self.account_text, (100, 50))
-            self.account_text = self.font.render(f'Наиграно времени: {round(list(self.db_cursor.execute('SELECT TIME_PLAYED FROM GAME_SETTINGS'),)[0][0], 1)} ч.', True, 'BLACK')
+            self.account_text = self.font.render(f'Наиграно времени: {round(list(self.db_cursor.execute(
+                'SELECT TIME_PLAYED FROM GAME_SETTINGS'),)[0][0], 1)} ч.', True, 'BLACK')
             self.account_screen.blit(self.account_text, (100, 150))
-            self.account_text = self.font.render(f'Собрано монет в INFINITY MODE: {list(self.db_cursor.execute('SELECT SCORE FROM GAME_PROCESS'))[0][0]}', True, 'BLACK')
+            self.account_text = self.font.render(f'Собрано монет в INFINITY MODE: {list(
+                self.db_cursor.execute('SELECT SCORE FROM GAME_PROCESS'))[0][0]}', True, 'BLACK')
             self.account_screen.blit(self.account_text, (100, 250))
         self.click_sound.play()
 
