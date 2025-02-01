@@ -2,6 +2,8 @@ import menu
 import datetime
 import pygame
 import pygame_widgets
+import sys
+
 
 start_time = datetime.datetime.now()
 LIGHT_BLUE = (66, 170, 255)
@@ -33,6 +35,8 @@ if __name__ == '__main__':
 
         if menu_instance.showing_skin_selector:
             menu_instance.draw_skin_selector()
+        elif menu_instance.showing_level_list:
+            menu_instance.open_level_list()
         elif menu_instance.showing_settings:
             menu_instance.open_settings()
         else:
@@ -42,3 +46,4 @@ if __name__ == '__main__':
         pygame.display.flip()
         clock.tick(60)
     pygame.quit()
+    sys.exit()

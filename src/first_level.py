@@ -1,9 +1,68 @@
+import ctypes
+from time import sleep
 import pygame
 import os
+import signal
+import time
 import random
 import sqlite3
 import subprocess
-import time
+
+pygame.init()
+win_sound = pygame.mixer.Sound('data\\win_sound.mp3')
+lose_sound = pygame.mixer.Sound('data\\lose_sound.mp3')
+intro_sound = pygame.mixer.Sound('data\\start_of_level.mp3')
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+    'mycompany.myproduct.subproduct.version')
+
+
+def intro():
+    WIDTH = 1500
+    HEIGHT = 900
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Jumper Game")
+    pygame.display.set_icon(pygame.image.load('data/character1.png'))
+    font_path = os.path.join("data", "first_level_intro_font.ttf")
+    try:
+        font = pygame.font.Font(font_path, 74)
+    except pygame.error as e:
+        print(f"Ошибка загрузки шрифта: {e}")
+        pygame.quit()
+        exit()
+
+    text = font.render("Первый уровень: Таинственное подземелье", True, WHITE)
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 3))
+
+    text_2 = font.render("Цель - собрать 10 монет", True, WHITE)
+    text_2_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    running = True
+    clock = pygame.time.Clock()
+    start_time = time.time()
+    shutdown = False
+    intro_sound
+    intro_sound.play()
+
+    def handle_sigterm(signum, frame):
+        global shutdown
+        shutdown = True
+        pygame.quit()
+
+    if hasattr(signal, 'SIGTERM'):
+        signal.signal(signal.SIGTERM, handle_sigterm)
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or shutdown:
+                running = False
+        screen.fill(BLACK)
+        screen.blit(text, text_rect)
+        screen.blit(text_2, text_2_rect)
+        pygame.display.flip()
+        clock.tick(60)
+        if time.time() - start_time >= 3 or shutdown:
+            running = False
 
 
 class Player(pygame.sprite.Sprite):
@@ -16,7 +75,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = y
         self.velocity_y = 0
         self.is_jumping = False
-        self.move_speed = speed // 10
+        self.move_speed = speed / 10
         self.gravity = 2
         self.jump_speed = -35
         self.on_ground = True
@@ -77,7 +136,7 @@ class Enemy(pygame.sprite.Sprite):
         screen.blit(self.image, (self.rect.x - camera_x, self.rect.y))
 
 
-pygame.init()
+intro()
 size = width, height = 1500, 900
 PURPLE = (139, 0, 255)
 screen = pygame.display.set_mode(size)
@@ -86,7 +145,7 @@ clock = pygame.time.Clock()
 
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join('..', 'data', name)
+    fullname = os.path.join('data', name)
     try:
         image = pygame.image.load(fullname)
     except pygame.error as message:
@@ -108,9 +167,9 @@ scaled_background = pygame.transform.scale(background_image, (1500, 900))
 background_rect.topleft = (0, 0)
 background_width = scaled_background.get_width()
 
-coin_image_path = '../data/coin.png'
+coin_image_path = 'coin.png'
 all_coins = pygame.sprite.Group()
-coin_sound = pygame.mixer.Sound(os.path.join('..', 'data', 'coin_sound.mp3'))
+coin_sound = pygame.mixer.Sound(os.path.join('data', 'coin_sound.mp3'))
 camera_x = 0
 scroll_speed = 5
 coin_spawn_timer = 0
@@ -121,35 +180,37 @@ font = pygame.font.Font(None, 36)  # Шрифт для текста
 conn = sqlite3.connect('game_data.db')
 cursor = conn.cursor()
 try:
-    cursor.execute("SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'")
+    cursor.execute(
+        "SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'")
     result = cursor.fetchone()
-    selected_character = result[0] if result else "character1.png"  # Ставим character1.png по умолчанию если не найдено
+    # Ставим character1.png по умолчанию если не найдено
+    selected_character = result[0] if result else "character1.png"
 
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
-        "character2.png": {"health": 100, "speed": 150},
-        "character33.png": {"health": 125, "speed": 125}
+        "character2.png": {"health": 100, "speed": 150}
     }
-    player_image_path = f'../data/{selected_character}'
+    player_image_path = selected_character
     player_health = player_stats[selected_character]['health']
     player_speed = player_stats[selected_character]['speed']
-    player = Player(50, 860 - 70, player_image_path, player_health, player_speed)
+    player = Player(50, 860 - 70, player_image_path,
+                    player_health, player_speed)
 except sqlite3.Error as e:
     print(f"Ошибка при загрузке данных персонажа: {e}")
     selected_character = "character1.png"
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
-        "character2.png": {"health": 125, "speed": 125},
-        "character33.png": {"health": 125, "speed": 125}
+        "character2.png": {"health": 100, "speed": 150}
     }
-    player_image_path = f'../data/{selected_character}'
+    player_image_path = selected_character
     player_health = player_stats[selected_character]['health']
     player_speed = player_stats[selected_character]['speed']
-    player = Player(50, 860 - 70, player_image_path, player_health, player_speed)
+    player = Player(50, 860 - 70, player_image_path,
+                    player_health, player_speed)
 finally:
     conn.close()
 
-enemy_image_path = '../data/character3.png'
+enemy_image_path = 'character3.png'
 all_enemies = pygame.sprite.Group()
 enemy_spawn_timer = 0
 enemy_spawn_interval = 200
@@ -159,14 +220,15 @@ health_text_rect = None
 game_over = False
 game_won = False
 game_over_font = pygame.font.Font(None, 72)
-damage_sound = pygame.mixer.Sound(os.path.join('..', 'data', 'damage.mp3'))
+damage_sound = pygame.mixer.Sound(os.path.join('data', 'damage.mp3'))
 
 
 def start_second_level():
     pygame.quit()
-    intro_process = subprocess.Popen(["python", "second_level_intro.py"])
+    intro_process = subprocess.Popen(["python", "src\\second_level_intro.py"])
     intro_process.wait()
-    second_level_process = subprocess.Popen(["python", "second_level.py"])  # Запускаем второй уровень
+    second_level_process = subprocess.Popen(
+        ["python", "src\\second_level.py"])  # Запускаем второй уровень
     second_level_process.wait()
 
 
@@ -199,7 +261,8 @@ while running:
             if player.rect.colliderect(coin.rect):
                 all_coins.remove(coin)
                 coins_collected += 1
-                coin_sound.play()
+                if coins_collected < 10:
+                    coin_sound.play()
                 if coins_collected >= 10:
                     game_won = True
 
@@ -225,31 +288,52 @@ while running:
             if player.rect.colliderect(enemy.rect):
                 all_enemies.remove(enemy)
                 player.health -= enemy_damage
-                damage_sound.play()
                 if player.health <= 0:
                     game_over = True
-
+                if not game_over:
+                    damage_sound.play()
         player.draw(screen, camera_x)
-        coin_text = font.render(f"Количество монет: {coins_collected}", True, (255, 255, 0))
+        coin_text = font.render(f"Количество монет: {
+                                coins_collected}", True, (255, 255, 0))
         text_rect = coin_text.get_rect()
         text_rect.topright = (width - 10, 10)
         screen.blit(coin_text, text_rect)
 
-        health_text_surface = font.render(f"Здоровье: {player.health}", True, (255, 0, 0))
+        health_text_surface = font.render(
+            f"Здоровье: {player.health}", True, (255, 0, 0))
         if health_text_rect is None:
             health_text_rect = health_text_surface.get_rect()
             health_text_rect.topleft = (10, 10)
         screen.blit(health_text_surface, health_text_rect)
     if game_over:
         screen.fill((0, 0, 0))
-        game_over_text = game_over_font.render("Ты проиграл", True, (255, 0, 0))
+        game_over_text = game_over_font.render(
+            "Ты проиграл", True, (255, 0, 0))
         text_rect = game_over_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_over_text, text_rect)
+        lose_sound.play()
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        running = False
     elif game_won:
+        with sqlite3.connect('game_data.db') as db:
+            db.cursor().execute('UPDATE GAME_PROCESS SET FIRST_LEVEL = 1')
+            if list(db.cursor().execute('SELECT SECOND_LEVEL FROM GAME_PROCESS'))[0][0] == -1:
+                db.cursor().execute('UPDATE GAME_PROCESS SET SECOND_LEVEL = 0')
+            db.commit()
         screen.fill((0, 0, 0))
-        game_win_text = game_over_font.render("Ты выиграл", True, (0, 255, 0))
+        game_win_text = game_over_font.render(
+            "Поздравляем! Ты прошел первый уровень. На очереди: \nСледующий", True, (0, 255, 0))
         text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
         screen.blit(game_win_text, text_rect)
+        screen.fill((0, 0, 0))
+        game_win_text = game_over_font.render("Поздравляем! Ты прошел первый уровень! Идем дальше...", True, (0, 255, 0))
+        text_rect = game_win_text.get_rect(center=(width // 2, height // 2))
+        screen.blit(game_win_text, text_rect)
+        win_sound.play()
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        running = False
         start_second_level()
     pygame.display.flip()
     clock.tick(60)
@@ -257,4 +341,6 @@ while running:
     if game_over or game_won:
         pygame.time.delay(2000)
         running = False
+
 pygame.quit()
+
