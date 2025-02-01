@@ -126,7 +126,7 @@ class Menu():
         self.character_stats = {
             "character1.png": {"health": 150, "speed": 100, "name": "Red-BSD"},
             "character2.png": {"health": 100, "speed": 150, "name": "Blue-BSD"},
-            "character33.png": {"health": 125, "speed": 125, "name": "Blue-BSD"}
+            "character33.png": {"health": 125, "speed": 125, "name": "Black-BSD"}
         }
         self.selected_character = self.load_selected_character()
 

@@ -16,7 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = y
         self.velocity_y = 0
         self.is_jumping = False
-        self.move_speed = speed / 10
+        self.move_speed = speed // 10
         self.gravity = 2
         self.jump_speed = -35
         self.on_ground = True
@@ -128,7 +128,7 @@ try:
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
         "character2.png": {"health": 100, "speed": 150},
-        "character33.png": {"health": 100, "speed": 150}
+        "character33.png": {"health": 125, "speed": 125}
     }
     player_image_path = f'../data/{selected_character}'
     player_health = player_stats[selected_character]['health']
