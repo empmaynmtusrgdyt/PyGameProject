@@ -7,8 +7,7 @@ import main
 import os
 import ctypes
 
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-    'mycompany.myproduct.subproduct.version')
+# ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('mycompany.myproduct.subproduct.version')
 pygame.init()
 
 
@@ -38,7 +37,7 @@ class Button():
 
         try:
             icon_image = pygame.transform.scale(
-                pygame.image.load(os.path.join(
+                pygame.image.load(os.path.join('..',
                     'data', self.icon_path)).convert_alpha(),
                 (int(self.radius * 1.2), int(self.radius * 1.2)))
             icon_rect = icon_image.get_rect(center=(self.radius, self.radius))
@@ -119,9 +118,9 @@ class Menu():
         self.showing_skin_selector = False
         self.skin_selector_screen = None
         self.skin_selector_buttons = None
-        self.click_sound = pygame.mixer.Sound('data/click.mp3')
+        self.click_sound = pygame.mixer.Sound('../data/click.mp3')
         self.click_sound.set_volume(35)
-        self.menu_music = pygame.mixer.Sound('data/menu.wav')
+        self.menu_music = pygame.mixer.Sound('../data/menu.wav')
         self.character_names = ["character1.png",
                                 "character2.png", "character33.png"]
         self.showing_skin_selector = False
@@ -132,7 +131,7 @@ class Menu():
         self.character_stats = {
             "character1.png": {"health": 150, "speed": 100, "name": "Red-BSD"},
             "character2.png": {"health": 100, "speed": 150, "name": "Blue-BSD"},
-            "character33.png": {"health": 125, "speed": 125, "name": "Blue-BSD"}
+            "character33.png": {"health": 125, "speed": 125, "name": "Black-BSD"}
         }
         self.levels_buttons_colors = {
             0: [(235, 128, 52), (255, 155, 52), (125, 125, 52), True],
@@ -148,7 +147,7 @@ class Menu():
             self.menu_music.stop()
 
     def load_image(self, name, colorkey=None, scale=None, pos=None):
-        fullname = os.path.join('data', name)
+        fullname = os.path.join('..', 'data', name)
 
         try:
             image = pygame.image.load(fullname).convert()
@@ -172,7 +171,7 @@ class Menu():
         return scaled_image, image_rect
 
     def load_font(self, name, size):
-        fullname = os.path.join('data', name)
+        fullname = os.path.join('..', 'data', name)
         try:
             font = pygame.font.Font(fullname, size)
         except pygame.error as message:
@@ -187,7 +186,7 @@ class Menu():
         return text_surface, text_rect
 
     def draw(self):
-        pygame.display.set_icon(pygame.image.load('data/character1.png'))
+        pygame.display.set_icon(pygame.image.load('../data/character1.png'))
         self.screen.fill((66, 170, 255))  # Используем цвет LIGHT_BLUE
         self.screen.blit(self.cloud_image, self.cloud_image_rect)
         self.screen.blit(self.title_surface, self.title_rect)
@@ -268,19 +267,19 @@ class Menu():
         self.click_sound.play()
 
     def open_first_level(self):
-        subprocess.Popen(['python', 'src\\first_level.py'])
+        subprocess.Popen(['python', '../src/first_level.py'])
         self.click_sound.play()
 
     def open_second_level(self):
-        subprocess.Popen(['python', 'src\\second_level.py'])
+        subprocess.Popen(['python', 'second_level.py'])
         self.click_sound.play()
 
     def open_third_level(self):
-        subprocess.Popen(['python', 'src\\third_level.py'])
+        subprocess.Popen(['python', 'third_level.py'])
         self.click_sound.play()
 
     def open_fourth_level(self):
-        subprocess.Popen(['python', 'src\\fourth_level.py'])
+        subprocess.Popen(['python', 'fourth_level.py'])
         self.click_sound.play()
 
     def open_infinity_level(self):
@@ -319,7 +318,7 @@ class Menu():
             self.skin_selector_screen.fill((66, 170, 255))  # LIGHT_BLUE
             try:
                 character_image = pygame.transform.scale(
-                    pygame.image.load(os.path.join(
+                    pygame.image.load(os.path.join('..',
                         'data', self.character_names[self.current_character_index])).convert_alpha(),
                     (400, 400))
                 self.skin_selector_screen.blit(character_image, (400, 30))
@@ -464,9 +463,9 @@ class Menu():
             self.quit_from_account_management.setText('Назад')
             self.text = f'За всё время Вы наиграли {round(float(
                 [item for item in self.db_cursor.execute('SELECT time_played FROM game_settings')][-1][-1]), 1)}'
-            self.account_text = self.font.render(
+            '''self.account_text = self.font.render(
                 'Ваша статистика:', True, 'BLACK')
-            self.account_screen.blit(self.account_text, (100, 50))
+            self.account_screen.blit(self.account_text, (100, 50))'''
             self.account_text = self.font.render(f'Наиграно времени: {round(list(self.db_cursor.execute(
                 'SELECT TIME_PLAYED FROM GAME_SETTINGS'),)[0][0], 1)} ч.', True, 'BLACK')
             self.account_screen.blit(self.account_text, (100, 150))

@@ -9,11 +9,10 @@ import time
 import ctypes
 
 pygame.init()
-win_sound = pygame.mixer.Sound('data\\win_sound.mp3')
-lose_sound = pygame.mixer.Sound('data\\lose_sound.mp3')
-intro_sound = pygame.mixer.Sound('data\\start_of_level.mp3')
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-    'mycompany.myproduct.subproduct.version')
+win_sound = pygame.mixer.Sound('../data/win_sound.mp3')
+lose_sound = pygame.mixer.Sound('../data/lose_sound.mp3')
+intro_sound = pygame.mixer.Sound('../data/start_of_level.mp3')
+# ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('mycompany.myproduct.subproduct.version')
 
 
 def intro():
@@ -23,8 +22,8 @@ def intro():
     BLACK = (0, 0, 0)
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Jumper Game")
-    pygame.display.set_icon(pygame.image.load('data/character1.png'))
-    font_path = os.path.join("data", "first_level_intro_font.ttf")
+    pygame.display.set_icon(pygame.image.load('../data/character1.png'))
+    font_path = os.path.join("..", "data", "first_level_intro_font.ttf")
     try:
         font = pygame.font.Font(font_path, 74)
     except pygame.error as e:
@@ -74,7 +73,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = y
         self.velocity_y = 0
         self.is_jumping = False
-        self.move_speed = speed / 10
+        self.move_speed = speed // 10
         self.gravity = 2
         self.jump_speed = -35
         self.on_ground = True
@@ -145,7 +144,7 @@ clock = pygame.time.Clock()
 
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
+    fullname = os.path.join('..', 'data', name)
     try:
         image = pygame.image.load(fullname)
     except pygame.error as message:
@@ -169,7 +168,7 @@ background_width = scaled_background.get_width()
 
 coin_image_path = 'coin.png'
 all_coins = pygame.sprite.Group()
-coin_sound = pygame.mixer.Sound(os.path.join('data', 'coin_sound.mp3'))
+coin_sound = pygame.mixer.Sound(os.path.join('..', 'data', 'coin_sound.mp3'))
 camera_x = 0
 scroll_speed = 5
 coin_spawn_timer = 0
@@ -189,7 +188,7 @@ try:
     player_stats = {
         "character1.png": {"health": 150, "speed": 100},
         "character2.png": {"health": 100, "speed": 150},
-        "character33.png": {"health": 100, "speed": 150}
+        "character33.png": {"health": 125, "speed": 125}
     }
     player_image_path = selected_character
     player_health = player_stats[selected_character]['health']
@@ -222,15 +221,13 @@ health_text_rect = None
 game_over = False
 game_won = False
 game_over_font = pygame.font.Font(None, 72)
-damage_sound = pygame.mixer.Sound(os.path.join('data', 'damage.mp3'))
+damage_sound = pygame.mixer.Sound(os.path.join('..', 'data', 'damage.mp3'))
 
 
 def start_second_level():
     pygame.quit()
-    intro_process = subprocess.Popen(["python", "src\\third_level_intro.py"])
-    intro_process.wait()
     second_level_process = subprocess.Popen(
-        ["python", "src\\third_level.py"])  # Запускаем третий уровень
+        ["python", "third_level.py"])  # Запускаем третий уровень
     second_level_process.wait()
 
 
