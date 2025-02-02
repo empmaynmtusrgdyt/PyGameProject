@@ -283,8 +283,8 @@ class Menu():
         self.click_sound.play()
 
     def open_infinity_level(self):
+        subprocess.Popen(['python', 'infinity_level.py'])
         self.click_sound.play()
-        pass
 
     def select_skin(self):
         if not self.showing_skin_selector:  # Проверяем, отображается ли уже окно выбора скина
