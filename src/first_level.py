@@ -227,7 +227,7 @@ damage_sound = pygame.mixer.Sound(os.path.join('..', 'data', 'damage.mp3'))
 def start_second_level():
     pygame.quit()
     second_level_process = subprocess.Popen(
-        ["python", "second_level.py"])  # Запускаем второй уровень
+        ["python", "dist/src/second_level.py"])  # Запускаем второй уровень
     second_level_process.wait()
 
 

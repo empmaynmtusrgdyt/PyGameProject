@@ -271,19 +271,19 @@ class Menu():
         self.click_sound.play()
 
     def open_second_level(self):
-        subprocess.Popen(['python', 'second_level.py'])
+        subprocess.Popen(['python', '../src/second_level.py'])
         self.click_sound.play()
 
     def open_third_level(self):
-        subprocess.Popen(['python', 'third_level.py'])
+        subprocess.Popen(['python', '../src/third_level.py'])
         self.click_sound.play()
 
     def open_fourth_level(self):
-        subprocess.Popen(['python', 'fourth_level.py'])
+        subprocess.Popen(['python', '../src/fourth_level.py'])
         self.click_sound.play()
 
     def open_infinity_level(self):
-        subprocess.Popen(['python', 'infinity_level.py'])
+        subprocess.Popen(['python', '../src/infinity_level.py'])
         self.click_sound.play()
 
     def select_skin(self):
