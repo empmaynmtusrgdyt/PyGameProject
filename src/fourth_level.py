@@ -181,8 +181,7 @@ conn = sqlite3.connect("game_data.db")
 cursor = conn.cursor()
 try:
     cursor.execute(
-        "SELECT setting_value FROM game_settings WHERE setting_name =
-        'selected_character'"
+        "SELECT setting_value FROM game_settings WHERE setting_name = 'selected_character'"
     )
     result = cursor.fetchone()
     # Ставим character1.png по умолчанию если не найдено
